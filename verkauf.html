@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DHBW Marktplatz – Produkt hochladen (v3, Schnittstelle)</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+/* Lightmode */
+  :root{
+    --red:#E2001A;
+    --red-dark:#B40014;
+    --black:#1A1A1A;
+    --grey-dark:#4A4A4A;
+    --grey:#5F5F5F;
+    --grey-light:#8C8C8C;
+    --ink:#1A1A1A;
+    --ink-soft:#5F5F5F;
+    --bg:#FFFFFF;
+    --bg-alt:#F5F5F5;
+    --border:#E1E1E1;
+    --border-strong:#C7C7C7;
+  }
+/* Darkmode */
+  body.dark-mode {
+  --black: #1e1b1b;
+  --ink: #0c0c0c;
+  --ink-soft: #0e0404e8;
+  --bg: #181818;
+  --bg-alt: #535353;
+  --border: #383838;
+  --border-strong: #555555;
+  --cat-ink:  #020202;
+}
+
+body.dark-mode {
+  background: var(--bg-alt);
+  color: var(--ink);
+}
+
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .burger-menu,
+body.dark-mode .searchbar input {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body.dark-mode .searchbar {
+  border-color: var(--border-strong);
+}
+
+body.dark-mode .card {
+  border-color: var(--border);
+}
+
+body.dark-mode .card-title,
+body.dark-mode .card-price,
+body.dark-mode .logo .rest,
+body.dark-mode .link-btn,
+body.dark-mode .user-name {
+  color: var(--cat-ink);
+}
+
+body.dark-mode .theme-button {
+  background: #fff;
+  color: #1a1a1a;
+  border-color: #fff;
+}
+
+body.dark-mode .logout-btn {
+  background: transparent;
+}
+
+body.dark-mode .empty-state h3 {
+  color: var(--cat-ink);
+}
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg-alt);
+    color:var(--cat-ink);
+    font-family:'Roboto', Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3{ margin:0; font-weight:700; }
+  button{ font-family:inherit; cursor:pointer; }
+  input,select,textarea{ font-family:inherit; }
+  a{ color:var(--red); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  :focus-visible{ outline:2px solid var(--red); outline-offset:2px; }
+
+  /* =========================================================
+     2) DEMO-SEITE DRUMHERUM (nur zum Testen)
+     ========================================================= */
+  .demo-page{
+    max-width:600px;
+    margin:60px auto;
+    padding:0 16px;
+    text-align:center;
+  }
+  .demo-page p{ color:var(--ink-soft); font-size:14px; margin-top:10px; }
+
+  .btn-primary{
+    background:var(--red);
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:22px;
+    font-weight:700;
+    font-size:14px;
+  }
+  .btn-primary:hover{ background:var(--red-dark); }
+  .btn-primary:disabled{ background:var(--grey-light); cursor:not-allowed; }
+
+  .btn-outline{
+    background:#fff;
+    color:var(--ink);
+    border:2px solid var(--black);
+    padding:8px 18px;
+    border-radius:22px;
+    font-weight:700;
+    font-size:14px;
+  }
+  .btn-text{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:4px;
+  }
+
+  /* =========================================================
+     3) UPLOAD-FENSTER – GRUNDGERÜST
+     ========================================================= */
+  .upload-overlay{
+    position:fixed; 
+    inset:0;
+    background:rgba(0,0,0,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:1000;
+    opacity:0;
+    transition:opacity .18s ease;
+  }
+  .upload-overlay.open{ display:flex; opacity:1; }
+
+  .upload-modal{
+    background:var(--bg);
+    width:100%;
+    max-width:760px;
+    max-height:90vh;
+    overflow-y:auto;
+    border-radius:8px;
+    padding:18px;
+    transform:translateY(14px);
+    opacity:0;
+    transition:transform .2s ease, opacity .2s ease;
+  }
+  .upload-overlay.open .upload-modal{
+    transform:translateY(0);
+    opacity:1;
+  }
+
+  .upload-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .upload-header h2{ font-size:18px; }
+  .upload-close{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    line-height:1;
+    padding:4px;
+  }
+
+  .upload-steps{
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+  }
+  .upload-steps span{
+    height:4px;
+    flex:1;
+    border-radius:4px;
+    background:var(--border);
+    transition:background .2s ease;
+  }
+  .upload-steps span.done{ background:var(--red); }
+
+  .upload-body{
+    display:flex;
+    gap:22px;
+    align-items:flex-start;
+  }
+  .upload-form-col{ flex:1.3; min-width:0; }
+  .upload-preview-col{
+    flex:1;
+    position:sticky;
+    top:0;
+  }
+
+  .upload-field{ margin-bottom:16px; }
+  .upload-field label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-weight:700;
+    font-size:13px;
+    margin-bottom:6px;
+  }
+  .upload-field .upload-counter{
+    font-weight:400;
+    color:var(--grey-light);
+    font-size:11.5px;
+  }
+  .upload-field input[type="text"],
+  .upload-field select,
+  .upload-field textarea{
+    width:100%;
+    border:1px solid var(--border-strong);
+    border-radius:4px;
+    padding:10px 11px;
+    font-size:14px;
+    color:var(--ink);
+    background:#fff;
+  }
+  .upload-field textarea{ resize:vertical; min-height:90px; }
+  .upload-hint{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+
+  .upload-row{ display:flex; gap:12px; }
+  .upload-row .upload-field{ flex:1; }
+
+  .upload-toggle{
+    display:flex;
+    border:1px solid var(--border-strong);
+    border-radius:22px;
+    overflow:hidden;
+    width:fit-content;
+  }
+  .upload-toggle button{
+    background:#fff;
+    color:var(--grey);
+    border:none;
+    padding:8px 18px;
+    font-size:13px;
+    font-weight:700;
+  }
+  .upload-toggle button.active{ background:var(--black); color:#fff; }
+
+  .upload-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .upload-chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border:1px solid var(--border-strong);
+    background:#fff;
+    color:var(--ink);
+    border-radius:22px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:500;
+  }
+  .upload-chip svg{ flex-shrink:0; }
+  .upload-chip.active{
+    background:var(--black);
+    border-color:var(--black);
+    color:#fff;
+  }
+
+  .upload-price-input{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    border:1px solid var(--border-strong);
+    border-radius:4px;
+    padding:8px 12px;
+  }
+  .upload-price-input input{
+    border:none;
+    outline:none;
+    font-size:26px;
+    font-weight:900;
+    width:100%;
+    color:var(--ink);
+    padding:0;
+  }
+  .upload-price-input span{ font-size:20px; font-weight:900; color:var(--ink-soft); }
+  .upload-price-input.disabled{ background:var(--bg-alt); color:var(--grey-light); }
+
+  
+  .upload-image-add{
+    width:96px; height:96px;
+    border:1px dashed var(--border-strong);
+    border-radius:4px;
+    background:var(--bg-alt);
+    color:var(--ink-soft);
+    display:flex;flex-direction: column; align-items:center; justify-content:center;
+    font-size:13px;
+    line-height: 1.4;
+    text-align: center;
+    cursor: pointer;
+  }
+.upload-field .upload-image-add {display: flex;
+  flex-direction:column;
+  align-items: center;
+  justify-content:center;
+}
+
+  .upload-image-thumb{
+    position:relative; width:96px; height:96px;
+    border-radius:4px; overflow:hidden; border:1px solid var(--border);
+    animation:upload-pop .15s ease;
+  }
+  @keyframes upload-pop{
+    from{ transform:scale(.85); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+  }
+  .upload-image-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .upload-image-remove{
+    position:absolute; top:2px; right:2px;
+    width:20px; height:20px; border-radius:50%;
+    background:rgba(0,0,0,0.6); color:#fff; border:none;
+    font-size:12px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .upload-footer{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:8px;
+    border-top:1px solid var(--border);
+    padding-top:14px;
+  }
+  .upload-footer-right{ display:flex; gap:10px; }
+
+  .upload-preview-label{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .upload-preview-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .upload-preview-image{
+    aspect-ratio:1/1;
+    background:var(--bg-alt);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--grey-light);
+    position:relative;
+  }
+  .upload-preview-image img{ width:100%; height:100%; object-fit:cover; }
+  .upload-preview-tag{
+    position:absolute;
+    top:8px; left:8px;
+    background:var(--red);
+    color:#fff;
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    border-radius:2px;
+    padding:3px 7px;
+  }
+  .upload-preview-text{ padding:10px 12px; }
+  .upload-preview-title{
+    font-size:13.5px;
+    color:var(--ink);
+    margin-bottom:4px;
+    min-height:16px;
+  }
+  .upload-preview-price{ font-size:16px; font-weight:700; color:var(--ink); }
+  .upload-preview-meta{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+
+  .upload-toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(10px);
+    background:var(--black); color:#fff;
+    border-left:4px solid var(--red);
+    border-radius:22px; padding:12px 20px; font-size:13px;
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:1100;
+  }
+  .upload-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:680px){
+    .upload-body{ flex-direction:column-reverse; }
+    .upload-preview-col{ position:static; width:100%; }
+    .upload-preview-card{ display:flex; }
+    .upload-preview-image{ width:84px; aspect-ratio:auto; height:84px; flex-shrink:0; }
+    .upload-preview-text{ flex:1; }
+  }
+
+  @media (max-width:480px){
+    .upload-row{ flex-direction:column; }
+    .upload-modal{
+      align-self:flex-end;
+      max-height:90vh;
+      border-radius:8px 8px 0 0;
+    }
+    .upload-overlay{ align-items:flex-end; }
+  }
+/* Schriftfarben im dunklen Verkaufsfenster */
+body.dark-mode .upload-header h2,
+body.dark-mode .upload-field > label,
+body.dark-mode .upload-preview-label {
+  color: #f5f5f5;
+}
+
+/* Zeichenzaehler und Hinweise */
+body.dark-mode .upload-counter,
+body.dark-mode .upload-hint {
+  color: #b8b8b8;
+}
+
+/* Kein Bild */
+body.dark-mode .upload-preview-image {
+  color: #d0d0d0;
+}
+
+/* Bild auswaehlen */
+body.dark-mode .upload-image-add {
+  color: #f5f5f5;
+  background: #242424;
+  border-color: #666666;
+}
+
+/* X oben rechts */
+body.dark-mode #upload-close-btn {
+  color: #ffffff;
+}
+
+/* Abbrechen */
+body.dark-mode #upload-cancel-btn {
+  color: #ffffff;
+}
+
+/* Zurueck */
+body.dark-mode #upload-back-btn {
+  color: #c7c7c7;
+}
+
+/* Hover-Effekt */
+body.dark-mode #upload-close-btn:hover,
+body.dark-mode #upload-cancel-btn:hover,
+body.dark-mode #upload-back-btn:hover {
+  color: var(--red);
+}
+</style>
+</head>
+<body>
+
+ 
+
+  <div class="upload-overlay" id="upload-overlay">
+    <div class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-title">
+
+      <div class="upload-header">
+        <h2 id="upload-title">Neues Angebot erstellen</h2>
+        <button class="upload-close" id="upload-close-btn" aria-label="Fenster schließen">✕</button>
+      </div>
+
+      <div class="upload-steps">
+        <span id="step-dot-1" class="done"></span>
+        <span id="step-dot-2"></span>
+      </div>
+
+      <form id="upload-form">
+        <div class="upload-body">
+
+          <div class="upload-form-col">
+
+            <!-- ===================== SCHRITT 1 ===================== -->
+            <div id="step-1">
+
+              <div class="upload-field">
+                <label>Angebotsart</label>
+                <div class="upload-toggle" id="upload-type-toggle">
+                  <button type="button" class="active" data-type="verkaufen">Verkaufen</button>
+                  <button type="button" data-type="tauschen">Tauschen</button>
+                </div>
+              </div>
+
+              <div class="upload-field">
+                <label>Kategorie</label>
+                <!-- Werte (data-value) entsprechen EXAKT den erlaubten Kategorie-IDs
+                     aus dem Schnittstellendokument (Abschnitt 5) -->
+                <div class="upload-chips" id="upload-category-chips">
+                  <button type="button" class="upload-chip" data-value="moebel" data-label="Möbel">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12v6M20 12v6M4 12a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2M4 18h16M6 10V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3"/></svg>
+                    Möbel
+                  </button>
+                  <button type="button" class="upload-chip" data-value="elektronik" data-label="Elektronik">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+                    Elektronik
+                  </button>
+                  <button type="button" class="upload-chip" data-value="buecher" data-label="Bücher &amp; Skripte">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 5c3-1.3 6-1.3 8 0v14c-2-1.3-5-1.3-8 0z"/><path d="M20 5c-3-1.3-6-1.3-8 0v14c2-1.3 5-1.3 8 0z"/></svg>
+                    Bücher &amp; Skripte
+                  </button>
+                  <button type="button" class="upload-chip" data-value="kueche" data-label="Küche">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 10h16v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M4 10 2 7M20 10l2-3"/><line x1="4" y1="10" x2="20" y2="10"/></svg>
+                    Küche
+                  </button>
+                  <button type="button" class="upload-chip" data-value="fahrrad" data-label="Fahrrad">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="6" cy="17" r="3.2"/><circle cx="18" cy="17" r="3.2"/><path d="M6 17 10 8h4l4 9M10 8 8 5h3"/></svg>
+                    Fahrrad
+                  </button>
+                  <button type="button" class="upload-chip" data-value="kleidung" data-label="Kleidung">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 4 12 6l3-2 4 4-3 3v9H8v-9L5 8z"/></svg>
+                    Kleidung
+                  </button>
+                  <button type="button" class="upload-chip" data-value="sonstiges" data-label="Sonstiges">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                    Sonstiges
+                  </button>
+                </div>
+              </div>
+
+              <div class="upload-field">
+                <label for="feld-titel">Titel <span class="upload-counter" id="titel-counter">0/60</span></label>
+                <input type="text" id="feld-titel" placeholder="Titel eingeben" required maxlength="60">
+              </div>
+
+              <div class="upload-field">
+                <label>Titelbild</label>
+                <div id="upload-image-container">
+                  <label class="upload-image-add" for="feld-bild">+<br>Bild wählen</label>
+
+                </div>
+                <input type="file" id="feld-bild" accept="image/*" style="display:none;">
+              </div>
+            </div>
+
+            <!-- ===================== SCHRITT 2 ===================== -->
+            <div id="step-2" style="display:none;">
+
+              <div class="upload-row">
+                <div class="upload-field">
+                  <label for="feld-preis">Preis</label>
+                  <div class="upload-price-input" id="preis-wrapper">
+                    <input type="number" id="feld-preis" min="0" step="0.5" placeholder="0">
+                    <span>€</span>
+                  </div>
+                  <div class="upload-hint">Bei "Tauschen" bleibt das Feld leer.</div>
+                </div>
+                <div class="upload-field">
+                  <label for="feld-zustand">Zustand</label>
+                  <select id="feld-zustand">
+                    <option value="Neu">Neu</option>
+                    <option value="Sehr gut">Sehr gut</option>
+                    <option value="Gut">Gut</option>
+                    <option value="Gebraucht">Gebraucht</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="upload-field">
+                <label for="feld-beschreibung">Beschreibung <span class="upload-counter" id="beschreibung-counter">0/800</span></label>
+                <textarea id="feld-beschreibung" placeholder="Beschreibe dein Angebot..." maxlength="800"></textarea>
+              </div>
+
+              <div class="upload-field">
+                <label for="feld-wohnheim">Wohnheim / Standort</label>
+                <input type="text" id="feld-wohnheim" placeholder="z.B. B 6">
+              </div>
+            </div>
+
+          </div>
+
+          <div class="upload-preview-col">
+            <div class="upload-preview-label">So sieht deine Anzeige aus</div>
+            <div class="upload-preview-card">
+              <div class="upload-preview-image" id="preview-image">
+                <span id="preview-image-placeholder">Kein Bild</span>
+                <span class="upload-preview-tag" id="preview-tag" style="display:none;">Tausch</span>
+              </div>
+              <div class="upload-preview-text">
+                <div class="upload-preview-title" id="preview-title">Titel deines Angebots</div>
+                <div class="upload-preview-price" id="preview-price"></div>
+                <div class="upload-preview-meta" id="preview-meta">Kategorie · Zustand</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="upload-footer">
+          <button type="button" class="btn-text" id="upload-back-btn" style="visibility:hidden;">Zurück</button>
+          <div class="upload-footer-right">
+            <button type="button" class="btn-text" id="upload-cancel-btn">Abbrechen</button>
+            <button type="button" class="btn-primary" id="upload-next-btn" disabled>Weiter</button>
+            <button type="submit" class="btn-primary" id="upload-submit-btn" style="display:none;">Anzeige veröffentlichen</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="upload-toast" id="upload-toast">Online. Deine Kommilitonen sehen es jetzt.</div>
+
+
+<script>
+"use strict";
+
+const overlay = document.getElementById("upload-overlay");
+const closeBtn = document.getElementById("upload-close-btn");
+const cancelBtn = document.getElementById("upload-cancel-btn");
+const form = document.getElementById("upload-form");
+const step1El = document.getElementById("step-1");
+const step2El = document.getElementById("step-2");
+const dot1 = document.getElementById("step-dot-1");
+const dot2 = document.getElementById("step-dot-2");
+const backBtn = document.getElementById("upload-back-btn");
+const nextBtn = document.getElementById("upload-next-btn");
+const submitBtn = document.getElementById("upload-submit-btn");
+const typeToggle = document.getElementById("upload-type-toggle");
+const chipsBox = document.getElementById("upload-category-chips");
+const titelFeld = document.getElementById("feld-titel");
+const titelCounter = document.getElementById("titel-counter");
+const beschreibungFeld = document.getElementById("feld-beschreibung");
+const beschreibungCounter = document.getElementById("beschreibung-counter");
+const preisFeld = document.getElementById("feld-preis");
+const preisWrapper = document.getElementById("preis-wrapper");
+const zustandFeld = document.getElementById("feld-zustand");
+const wohnheimFeld = document.getElementById("feld-wohnheim");
+const bildInput = document.getElementById("feld-bild");
+const bildContainer = document.getElementById("upload-image-container");
+const previewImage = document.getElementById("preview-image");
+const previewPlaceholder = document.getElementById("preview-image-placeholder");
+const previewTag = document.getElementById("preview-tag");
+const previewTitle = document.getElementById("preview-title");
+const previewPrice = document.getElementById("preview-price");
+const previewMeta = document.getElementById("preview-meta");
+const uploadTitle = document.getElementById("upload-title");
+
+function leseJson(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) || fallback;
+  } catch (fehler) {
+    console.error(key + " konnte nicht gelesen werden:", fehler);
+    return fallback;
+  }
+}
+
+const loggedInUser = leseJson("loggedInUser", null);
+
+if (!loggedInUser) {
+  window.alert("Du musst angemeldet sein, um eine Anzeige zu erstellen.");
+  window.location.href = "anmeldeseite_regestrierung.html";
+}
+
+const urlParameter = new URLSearchParams(window.location.search);
+const bearbeitungsId = urlParameter.get("edit");
+let zuBearbeitendeAnzeige = null;
+let aktuellesBild = "";
+let gewaehlteKategorie = null;
+
+function ladeGespeichertesTheme() {
+  document.body.classList.toggle(
+    "dark-mode",
+    localStorage.getItem("theme") === "dark"
+  );
+}
+
+function darfAnzeigeVerwalten(anzeige) {
+  if (!loggedInUser || !anzeige) return false;
+  return (
+    loggedInUser.role === "admin" ||
+    String(anzeige.ownerId) === String(loggedInUser.id)
+  );
+}
+
+function fensterOeffnen() {
+  overlay.classList.add("open");
+}
+
+function zurHauptseite() {
+  window.location.href = "index.html";
+}
+
+function zuSchritt(nummer) {
+  const istSchritt1 = nummer === 1;
+  step1El.style.display = istSchritt1 ? "block" : "none";
+  step2El.style.display = istSchritt1 ? "none" : "block";
+  dot1.classList.add("done");
+  dot2.classList.toggle("done", !istSchritt1);
+  backBtn.style.visibility = istSchritt1 ? "hidden" : "visible";
+  nextBtn.style.display = istSchritt1 ? "inline-block" : "none";
+  submitBtn.style.display = istSchritt1 ? "none" : "inline-block";
+}
+
+function pruefeSchritt1() {
+  nextBtn.disabled = !(
+    titelFeld.value.trim().length > 0 && gewaehlteKategorie
+  );
+}
+
+function setzeAngebotsart(tausch) {
+  const verkaufenButton = typeToggle.querySelector('[data-type="verkaufen"]');
+  const tauschenButton = typeToggle.querySelector('[data-type="tauschen"]');
+
+  verkaufenButton.classList.toggle("active", !tausch);
+  tauschenButton.classList.toggle("active", tausch);
+  preisFeld.disabled = tausch;
+  preisWrapper.classList.toggle("disabled", tausch);
+
+  if (tausch) preisFeld.value = "";
+}
+
+function setzeKategorie(kategorieId) {
+  const chip = chipsBox.querySelector(
+    '.upload-chip[data-value="' + CSS.escape(String(kategorieId)) + '"]'
+  );
+
+  chipsBox.querySelectorAll(".upload-chip").forEach(function (eintrag) {
+    eintrag.classList.remove("active");
+  });
+
+  if (!chip) {
+    gewaehlteKategorie = null;
+    return;
+  }
+
+  chip.classList.add("active");
+  gewaehlteKategorie = {
+    wert: chip.dataset.value,
+    label: chip.dataset.label
+  };
+}
+
+function bildVerkleinernUndUmwandeln(datei) {
+  return new Promise(function (resolve, reject) {
+    const reader = new FileReader();
+
+    reader.onerror = reject;
+    reader.onload = function (event) {
+      const bild = new Image();
+      bild.onerror = reject;
+      bild.onload = function () {
+        const maxBreite = 800;
+        const faktor = Math.min(1, maxBreite / bild.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(bild.width * faktor);
+        canvas.height = Math.round(bild.height * faktor);
+        const context = canvas.getContext("2d");
+        context.drawImage(bild, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.75));
+      };
+      bild.src = event.target.result;
+    };
+
+    reader.readAsDataURL(datei);
+  });
+}
+
+function bildBildschirmAktualisieren() {
+  bildContainer.innerHTML = "";
+
+  if (aktuellesBild) {
+    const thumb = document.createElement("div");
+    thumb.className = "upload-image-thumb";
+
+    const bild = document.createElement("img");
+    bild.src = aktuellesBild;
+    bild.alt = "Titelbild-Vorschau";
+
+    const entfernenButton = document.createElement("button");
+    entfernenButton.type = "button";
+    entfernenButton.className = "upload-image-remove";
+    entfernenButton.setAttribute("aria-label", "Bild entfernen");
+    entfernenButton.textContent = "✕";
+    entfernenButton.addEventListener("click", function () {
+      aktuellesBild = "";
+      bildBildschirmAktualisieren();
+      vorschauAktualisieren();
+    });
+
+    thumb.appendChild(bild);
+    thumb.appendChild(entfernenButton);
+    bildContainer.appendChild(thumb);
+    return;
+  }
+
+  const label = document.createElement("label");
+  label.className = "upload-image-add";
+  label.setAttribute("for", "feld-bild");
+  label.innerHTML = "+<br>Bild wählen";
+  bildContainer.appendChild(label);
+}
+
+function vorschauAktualisieren() {
+  previewTitle.textContent = titelFeld.value.trim() || "Titel deines Angebots";
+
+  let bild = previewImage.querySelector("img");
+  if (aktuellesBild) {
+    previewPlaceholder.style.display = "none";
+    if (!bild) {
+      bild = document.createElement("img");
+      previewImage.prepend(bild);
+    }
+    bild.src = aktuellesBild;
+  } else {
+    previewPlaceholder.style.display = "block";
+    if (bild) bild.remove();
+  }
+
+  const aktiverTyp = typeToggle.querySelector("button.active");
+  const istTausch = aktiverTyp && aktiverTyp.dataset.type === "tauschen";
+  previewTag.style.display = istTausch ? "block" : "none";
+  previewPrice.textContent = istTausch
+    ? "Tausch"
+    : preisFeld.value
+      ? preisFeld.value.replace(".", ",") + " €"
+      : "";
+
+  const kategorieLabel = gewaehlteKategorie
+    ? gewaehlteKategorie.label
+    : "Kategorie";
+  previewMeta.textContent = kategorieLabel + " · " + zustandFeld.value;
+
+  titelCounter.textContent = titelFeld.value.length + "/60";
+  beschreibungCounter.textContent = beschreibungFeld.value.length + "/800";
+  pruefeSchritt1();
+}
+
+function fuelleFormularAus(anzeige) {
+  titelFeld.value = anzeige.title || "";
+  preisFeld.value = anzeige.tausch ? "" : String(Number(anzeige.price) || 0);
+  wohnheimFeld.value = anzeige.wohnheim || "";
+  zustandFeld.value = anzeige.zustand || "Gut";
+  beschreibungFeld.value = anzeige.beschreibung || "";
+  aktuellesBild = anzeige.bild || "";
+
+  setzeAngebotsart(Boolean(anzeige.tausch));
+  setzeKategorie(anzeige.kategorie || "sonstiges");
+
+  uploadTitle.textContent = "Anzeige bearbeiten";
+  submitBtn.textContent = "Änderungen speichern";
+
+  bildBildschirmAktualisieren();
+  vorschauAktualisieren();
+}
+
+function ladeAnzeigeZumBearbeiten() {
+  if (!bearbeitungsId) {
+    if (loggedInUser && loggedInUser.wohnheim) {
+      wohnheimFeld.value = loggedInUser.wohnheim;
+    }
+    return;
+  }
+
+  const anzeigen = leseJson("anzeigen", []);
+  zuBearbeitendeAnzeige = anzeigen.find(function (anzeige) {
+    return String(anzeige.id) === String(bearbeitungsId);
+  });
+
+  if (!zuBearbeitendeAnzeige) {
+    window.alert("Die Anzeige wurde nicht gefunden.");
+    zurHauptseite();
+    return;
+  }
+
+  if (!darfAnzeigeVerwalten(zuBearbeitendeAnzeige)) {
+    window.alert("Du darfst diese Anzeige nicht bearbeiten.");
+    window.location.href =
+      "anzeige.html?id=" + encodeURIComponent(zuBearbeitendeAnzeige.id);
+    return;
+  }
+
+  fuelleFormularAus(zuBearbeitendeAnzeige);
+}
+
+closeBtn.addEventListener("click", zurHauptseite);
+cancelBtn.addEventListener("click", zurHauptseite);
+nextBtn.addEventListener("click", function () { zuSchritt(2); });
+backBtn.addEventListener("click", function () { zuSchritt(1); });
+
+typeToggle.addEventListener("click", function (event) {
+  const button = event.target.closest("button[data-type]");
+  if (!button) return;
+  setzeAngebotsart(button.dataset.type === "tauschen");
+  vorschauAktualisieren();
+});
+
+chipsBox.addEventListener("click", function (event) {
+  const chip = event.target.closest(".upload-chip[data-value]");
+  if (!chip) return;
+  setzeKategorie(chip.dataset.value);
+  vorschauAktualisieren();
+});
+
+titelFeld.addEventListener("input", vorschauAktualisieren);
+beschreibungFeld.addEventListener("input", vorschauAktualisieren);
+preisFeld.addEventListener("input", vorschauAktualisieren);
+zustandFeld.addEventListener("change", vorschauAktualisieren);
+wohnheimFeld.addEventListener("input", vorschauAktualisieren);
+
+bildInput.addEventListener("change", async function () {
+  const datei = bildInput.files[0];
+  if (!datei) return;
+
+  try {
+    aktuellesBild = await bildVerkleinernUndUmwandeln(datei);
+    bildBildschirmAktualisieren();
+    vorschauAktualisieren();
+  } catch (fehler) {
+    console.error("Bild konnte nicht verarbeitet werden:", fehler);
+    window.alert("Das Bild konnte nicht verarbeitet werden.");
+  } finally {
+    bildInput.value = "";
+  }
+});
+
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  if (!loggedInUser) return;
+
+  if (!titelFeld.value.trim()) {
+    window.alert("Bitte gib einen Titel ein.");
+    zuSchritt(1);
+    titelFeld.focus();
+    return;
+  }
+
+  if (!gewaehlteKategorie) {
+    window.alert("Bitte wähle eine Kategorie aus.");
+    zuSchritt(1);
+    return;
+  }
+
+  const aktiverTyp = typeToggle.querySelector("button.active");
+  const istTausch = aktiverTyp.dataset.type === "tauschen";
+  const preis = Number(preisFeld.value);
+
+  if (!istTausch && (preisFeld.value === "" || !Number.isFinite(preis) || preis < 0)) {
+    window.alert("Bitte gib einen gültigen Preis ein.");
+    preisFeld.focus();
+    return;
+  }
+
+  const anzeigeDaten = {
+    title: titelFeld.value.trim(),
+    price: istTausch ? 0 : preis,
+    tausch: istTausch,
+    kategorie: gewaehlteKategorie.wert,
+    wohnheim: wohnheimFeld.value.trim() || loggedInUser.wohnheim || "Keine Angabe",
+    zustand: zustandFeld.value,
+    beschreibung: beschreibungFeld.value.trim(),
+    bild: aktuellesBild
+  };
+
+  const anzeigen = leseJson("anzeigen", []);
+  let gespeicherteAnzeigeId;
+
+  if (zuBearbeitendeAnzeige) {
+    const index = anzeigen.findIndex(function (anzeige) {
+      return String(anzeige.id) === String(zuBearbeitendeAnzeige.id);
+    });
+
+    if (index === -1) {
+      window.alert("Die Anzeige wurde nicht gefunden.");
+      return;
+    }
+
+    if (!darfAnzeigeVerwalten(anzeigen[index])) {
+      window.alert("Du darfst diese Anzeige nicht bearbeiten.");
+      return;
+    }
+
+    anzeigen[index] = {
+      ...anzeigen[index],
+      ...anzeigeDaten,
+      id: anzeigen[index].id,
+      ownerId: anzeigen[index].ownerId,
+      ownerName: anzeigen[index].ownerName,
+      ownerEmail: anzeigen[index].ownerEmail,
+      bearbeitetAm: new Date().toISOString()
+    };
+
+    gespeicherteAnzeigeId = anzeigen[index].id;
+  } else {
+    const neueAnzeige = {
+      ...anzeigeDaten,
+      id: "anzeige-" + Date.now(),
+      ownerId: loggedInUser.id,
+      ownerName: loggedInUser.name || loggedInUser.email,
+      ownerEmail: loggedInUser.email,
+      erstelltAm: new Date().toISOString()
+    };
+
+    anzeigen.unshift(neueAnzeige);
+    gespeicherteAnzeigeId = neueAnzeige.id;
+  }
+
+  try {
+    localStorage.setItem("anzeigen", JSON.stringify(anzeigen));
+  } catch (fehler) {
+    console.error("Anzeige konnte nicht gespeichert werden:", fehler);
+    window.alert(
+      "Die Anzeige konnte nicht gespeichert werden. Möglicherweise ist das Bild zu groß."
+    );
+    return;
+  }
+
+  window.location.href =
+    "anzeige.html?id=" + encodeURIComponent(gespeicherteAnzeigeId);
+});
+
+ladeGespeichertesTheme();
+zuSchritt(1);
+bildBildschirmAktualisieren();
+ladeAnzeigeZumBearbeiten();
+vorschauAktualisieren();
+fensterOeffnen();
+
+</script>
+</body>
+</html>
