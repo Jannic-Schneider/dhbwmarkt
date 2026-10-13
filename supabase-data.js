@@ -204,9 +204,105 @@
     if (error) throw error;
   }
 
+
+  async function bootstrapCache() {
+    const db = client();
+    const user = await currentUser();
+    if (!user) {
+      localStorage.removeItem("loggedInUser");
+      localStorage.setItem("anzeigen", "[]");
+      localStorage.setItem("nachrichten", "[]");
+      localStorage.setItem("bewertungen", "[]");
+      return null;
+    }
+
+    const { data: profile, error: profileError } = await db
+      .from("profiles")
+      .select("id,display_name,wohnheim,avatar_url,role")
+      .eq("id", user.id).maybeSingle();
+    if (profileError) throw profileError;
+
+    const loggedInUser = {
+      id: user.id,
+      name: profile?.display_name || user.user_metadata?.display_name || user.email,
+      email: user.email,
+      wohnheim: profile?.wohnheim || user.user_metadata?.wohnheim || "",
+      role: profile?.role || "user",
+      profileImage: profile?.avatar_url || ""
+    };
+    localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+    localStorage.setItem("registeredUsers", JSON.stringify([{
+      ...loggedInUser, profileImage: loggedInUser.profileImage
+    }]));
+
+    const listings = await getListings({ includeArchived: true });
+    localStorage.setItem("anzeigen", JSON.stringify(listings));
+
+    const favorites = await getFavorites();
+    localStorage.setItem("favoriten-" + user.id, JSON.stringify(favorites));
+
+    const messages = await getMessages();
+    const listingById = new Map(listings.map((item) => [String(item.id), item]));
+    let profiles = [];
+    const { data: profileRows, error: profilesError } = await db
+      .from("profiles").select("id,display_name,avatar_url");
+    if (!profilesError) profiles = profileRows || [];
+    const profileById = new Map(profiles.map((item) => [String(item.id), item]));
+    const mappedMessages = messages.map((message) => {
+      const listing = listingById.get(String(message.anzeigeId)) || {};
+      const sender = profileById.get(String(message.vonId)) || {};
+      const recipient = profileById.get(String(message.anId)) || {};
+      const participantIds = [String(message.vonId), String(message.anId)].sort();
+      return {
+        ...message,
+        konversationId: String(message.anzeigeId) + "|" + participantIds.join("|"),
+        anzeigeTitel: listing.title || "Anzeige",
+        vonName: sender.display_name || (String(message.vonId) === user.id ? loggedInUser.name : "DHBWMarkt-Nutzer"),
+        anName: recipient.display_name || (String(message.anId) === user.id ? loggedInUser.name : "DHBWMarkt-Nutzer"),
+        gelesen: Boolean(message.gelesen)
+      };
+    });
+    localStorage.setItem("nachrichten", JSON.stringify(mappedMessages));
+
+    const reviews = await getReviews();
+    localStorage.setItem("bewertungen", JSON.stringify(reviews.map((r) => ({
+      id: r.id, verkaeuferId: r.fuerId, bewerterId: r.vonId,
+      sterne: r.sterne, kommentar: r.kommentar, erstelltAm: r.erstelltAm
+    }))));
+    return loggedInUser;
+  }
+
+  async function updateProfile(fields) {
+    const user = await currentUser();
+    if (!user) throw new Error("Bitte melde dich erneut an.");
+    const patch = {};
+    if (fields.name !== undefined) patch.display_name = String(fields.name).trim();
+    if (fields.wohnheim !== undefined) patch.wohnheim = String(fields.wohnheim);
+    if (fields.avatar_url !== undefined) patch.avatar_url = String(fields.avatar_url);
+    if (Object.keys(patch).length) {
+      const { error } = await client().from("profiles").update(patch).eq("id", user.id);
+      if (error) throw error;
+    }
+    if (fields.email && fields.email !== user.email) {
+      const { error } = await client().auth.updateUser({ email: fields.email });
+      if (error) throw error;
+    }
+    return bootstrapCache();
+  }
+
+  async function changePassword(password) {
+    const { error } = await client().auth.updateUser({ password });
+    if (error) throw error;
+  }
+
+  async function deleteOwnAccount() {
+    throw new Error("Konten können aus Sicherheitsgründen nicht direkt aus dem Browser gelöscht werden. Bitte nutze den sicheren Kontolöschungsprozess des Betreibers.");
+  }
+
   window.DHBWMarktData = {
     client, currentUser, getListings, saveListing, deleteListing,
     getFavorites, setFavorite, getMessages, sendMessage,
-    markMessagesRead, getReviews, saveReview, mapListing
+    markMessagesRead, getReviews, saveReview, mapListing,
+    bootstrapCache, updateProfile, changePassword, deleteOwnAccount
   };
 })();
