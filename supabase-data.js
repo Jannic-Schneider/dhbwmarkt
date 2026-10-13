@@ -290,19 +290,22 @@
       ...loggedInUser, profileImage: loggedInUser.profileImage
     }]));
 
-    const listings = await getListings({ includeArchived: true });
+    // Unabhängige Supabase-Abfragen parallel ausführen statt nacheinander abzuwarten.
+    const [listings, favorites, messages, reviews, profileResult] = await Promise.all([
+      getListings({ includeArchived: true }),
+      getFavorites(),
+      getMessages(),
+      getReviews(),
+      db.from("profiles").select("id,display_name,avatar_url")
+    ]);
     localStorage.setItem("anzeigen", JSON.stringify(listings));
-
-    const favorites = await getFavorites();
     localStorage.setItem("favoriten-" + user.id, JSON.stringify(favorites));
 
-    const messages = await getMessages();
+    const profileById = new Map(
+      ((profileResult && !profileResult.error && profileResult.data) || [])
+        .map((item) => [String(item.id), item])
+    );
     const listingById = new Map(listings.map((item) => [String(item.id), item]));
-    let profiles = [];
-    const { data: profileRows, error: profilesError } = await db
-      .from("profiles").select("id,display_name,avatar_url");
-    if (!profilesError) profiles = profileRows || [];
-    const profileById = new Map(profiles.map((item) => [String(item.id), item]));
     const mappedMessages = messages.map((message) => {
       const listing = listingById.get(String(message.anzeigeId)) || {};
       const sender = profileById.get(String(message.vonId)) || {};
@@ -319,7 +322,6 @@
     });
     localStorage.setItem("nachrichten", JSON.stringify(mappedMessages));
 
-    const reviews = await getReviews();
     localStorage.setItem("bewertungen", JSON.stringify(reviews.map((r) => ({
       id: r.id, verkaeuferId: r.fuerId, bewerterId: r.vonId,
       sterne: r.sterne, kommentar: r.kommentar, erstelltAm: r.erstelltAm
