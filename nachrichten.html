@@ -363,7 +363,7 @@
     }
 
     // ===== Zugriffsschutz =====
-    const ich = leseJson("loggedInUser", null);
+    let ich = leseJson("loggedInUser", null);
     if (!ich) {
       window.location.href = "anmeldeseite_regestrierung.html";
     }
@@ -610,9 +610,14 @@
     }
 
     (async function ladeGemeinsameNachrichten() {
-      try { await window.DHBWMarktData.bootstrapCache(); }
-      catch (error) { console.error("Nachrichten konnten nicht geladen werden:", error); }
+      try {
+        await window.DHBWMarktData.bootstrapCache();
+        ich = leseJson("loggedInUser", null);
+      } catch (error) {
+        console.error("Nachrichten konnten nicht geladen werden:", error);
+      }
       if (ich) starte();
+      else window.location.href = "anmeldeseite_regestrierung.html";
     })();
   </script>
 </body>
