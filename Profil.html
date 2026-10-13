@@ -865,18 +865,19 @@ if (dashboardRow) {
       try {
         await window.DHBWMarktData.updateProfile({ name: neuerName, email: neueEmail, wohnheim: neuesWohnheim });
         await window.DHBWMarktData.bootstrapCache();
-        (async function ladeProfilAusSupabase() {
-      try { await window.DHBWMarktData.bootstrapCache(); }
-      catch (error) { console.error("Profil konnte nicht geladen werden:", error); }
-      zeigeProfil();
-    })();
+        zeigeProfil();
         schliesseBearbeitung();
         zeigeStatus("Profil gespeichert. Eine E-Mail-Änderung kann eine Bestätigung erfordern.", "green");
       } catch (error) {
         console.error(error);
         zeigeStatus("Profil konnte nicht gespeichert werden: " + (error.message || error), "red");
       }
-    }););
+    });
+
+    function zeigePasswortStatus(text) {
+      passwordStatus.textContent = text;
+      passwordStatus.style.color = "red";
+    }
 
         function zeigePasswortStatus(text) {
       passwordStatus.textContent = text;
@@ -915,9 +916,9 @@ if (dashboardRow) {
         schliessePasswortFormular();
       } catch (error) {
         console.error(error);
-        zeigePasswortStatus("Passwort konnte nicht geändert werden: " + (error.message || error));
+        zeigePasswortStatus("Passwort konnte nicht geändert werden: " + (error.message || error), "red");
       }
-    }););
+    });
 
     // ===== Wiederherstellungscode =====
 
@@ -934,6 +935,7 @@ if (dashboardRow) {
       return code;
     }
 
+    if (recoveryRow) recoveryRow.hidden = true;
     recoveryButton.addEventListener("click", function () {
       const benutzer = ladeJson("loggedInUser");
       if (!benutzer) return;
