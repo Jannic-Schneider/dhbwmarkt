@@ -1292,13 +1292,52 @@
       }).join("");
     }
 
-    function loescheAnzeige(id) {
+    async function loescheAnzeige(id) {
       const anzeigen = ladeAnzeigen();
       const ziel = anzeigen.find(function (a) { return String(a.id) === String(id); });
       if (!ziel) return;
-      if (!window.confirm('Anzeige "' + ziel.title + '" wirklich löschen?')) return;
-      window.alert("Das Löschen von Anzeigen durch Administratoren benötigt eine sichere Serverfunktion. Bitte lösche die Anzeige vorerst über den Eigentümer-Account.");
-      return;
+      if (!window.confirm('Anzeige "' + ziel.title + '" wirklich endgültig löschen?')) return;
+
+      const buttons = adBody.querySelectorAll("[data-delete-ad]");
+      buttons.forEach(function (button) { button.disabled = true; });
+
+      try {
+        if (!window.DHBWMarktData || !window.DHBWMarktData.client) {
+          throw new Error("Die Datenbankverbindung ist nicht verfügbar. Bitte lade die Seite neu.");
+        }
+
+        const db = window.DHBWMarktData.client();
+        const { data, error } = await db.rpc("admin_delete_listing", {
+          p_listing_id: String(id)
+        });
+
+        if (error) {
+          console.error("Admin-Anzeigenlöschung fehlgeschlagen:", error);
+          if (error.code === "PGRST202" || error.code === "42883") {
+            throw new Error("Die sichere Löschfunktion fehlt noch in Supabase. Bitte führe zuerst das SQL für admin_delete_listing aus.");
+          }
+          if (error.code === "42501") {
+            throw new Error("Supabase hat die Löschung abgelehnt. Prüfe, ob dein Konto in profiles die Rolle 'admin' hat.");
+          }
+          throw new Error(error.message || "Unbekannter Datenbankfehler.");
+        }
+
+        if (data === false) {
+          throw new Error("Die Anzeige wurde nicht gefunden oder konnte nicht gelöscht werden.");
+        }
+
+        await window.DHBWMarktData.bootstrapCache();
+        renderStats();
+        renderCharts();
+        renderBenutzer();
+        renderAnzeigen();
+        zeigeToast("Anzeige erfolgreich gelöscht.");
+      } catch (fehler) {
+        console.error("Anzeige konnte nicht gelöscht werden:", fehler);
+        window.alert("Anzeige konnte nicht gelöscht werden.\n\n" + (fehler.message || fehler));
+      } finally {
+        buttons.forEach(function (button) { button.disabled = false; });
+      }
     }
 
     adSearch.addEventListener("input", renderAnzeigen);
