@@ -16,3 +16,22 @@
 
 ## Saubere Datenbasis
 Bestehende `localStorage`-Daten werden nicht importiert. Benutzer registrieren sich neu. Die lokalen Anzeigen/Favoriten/Nachrichten bleiben zunächst nur im jeweiligen Browser, bis die betreffenden Seiten ebenfalls auf Supabase umgestellt sind.
+
+
+## Stand der weiteren Seiten (Migration in Arbeit)
+- Startseite lädt Anzeigen und Favoriten über `supabase-data.js`.
+- Neue/aktualisierte Anzeigen werden in Supabase gespeichert.
+- Detailseite verwendet gemeinsame Anzeigen, Favoriten und Bewertungen.
+- Chat lädt/sendet Nachrichten über Supabase.
+- Profiländerungen, Passwortänderungen und Profilbilder verwenden Supabase Auth/Profile.
+- Das Admin-Dashboard prüft die Admin-Rolle in der Datenbank; die Benutzerverwaltung benötigt noch eine sichere Serverfunktion und darf nicht über den öffentlichen Browser-Key implementiert werden.
+- Bilder werden in den Storage-Bucket `anzeigenbilder` hochgeladen. Vor dem Test muss `supabase-storage.sql` einmal im Supabase SQL Editor ausgeführt werden.
+- Die Website wurde noch nicht veröffentlicht und die Änderungen sind nicht in `main` zusammengeführt.
+
+## Vor dem ersten Funktionstest
+1. `supabase-storage.sql` im Supabase SQL Editor ausführen, damit Bild-Uploads funktionieren.
+2. In **Authentication → URL Configuration** nach Veröffentlichung die erlaubten Website- und Passwort-Reset-URLs eintragen.
+3. Einen Testnutzer registrieren und in Supabase prüfen, ob in `profiles` ein Profil erstellt wird.
+4. Die Migration zuerst im Branch testen; den Draft Pull Request nicht mergen, bevor die Tests erfolgreich sind.
+
+Hinweis: Der Browser-Cache wird nur als temporäre Kompatibilitätsschicht genutzt. Die Datenquelle soll Supabase sein. Admin-Löschungen übergreifender Daten und die vollständige Benutzerverwaltung sind noch nicht umgesetzt.
