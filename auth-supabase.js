@@ -46,7 +46,7 @@
     "N 6 / Hermann-Heimerich-Haus – N 6, 8, 68161 Mannheim"
   ];
 
-  if (wohnheimSelect && !wohnheimSelect.options.length) {
+  if (wohnheimSelect && wohnheimSelect.options.length <= 1) {
     WOHNHEIME.forEach((name) => {
       const option = document.createElement("option");
       option.value = name;
