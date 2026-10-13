@@ -67,8 +67,12 @@
     if (ownerIds.length) {
       const { data: profiles, error: profileError } = await db
         .from("profiles").select("id,display_name,wohnheim,avatar_url").in("id", ownerIds);
-      if (profileError) throw profileError;
-      profileMap = new Map((profiles || []).map((profile) => [String(profile.id), profile]));
+      if (profileError) {
+        // Öffentliche Anzeigen sollen auch dann sichtbar bleiben, wenn Profil-Leserechte fehlen.
+        console.warn("Verkäuferprofile konnten nicht öffentlich geladen werden:", profileError.message);
+      } else {
+        profileMap = new Map((profiles || []).map((profile) => [String(profile.id), profile]));
+      }
     }
     return rows.map((row) => mapListing({ ...row, profiles: profileMap.get(String(row.owner_id)) || {} }));
   }
@@ -263,9 +267,14 @@
   async function bootstrapCache() {
     const db = client();
     const user = await currentUser();
+
+    // Aktive Anzeigen sind öffentlich: zuerst unabhängig vom Login laden.
+    // Die Startseite darf nicht davon abhängen, ob ein Nutzer angemeldet ist.
+    const listings = await getListings();
+    localStorage.setItem("anzeigen", JSON.stringify(listings));
+
     if (!user) {
       localStorage.removeItem("loggedInUser");
-      localStorage.setItem("anzeigen", "[]");
       localStorage.setItem("nachrichten", "[]");
       localStorage.setItem("bewertungen", "[]");
       return null;
@@ -290,15 +299,13 @@
       ...loggedInUser, profileImage: loggedInUser.profileImage
     }]));
 
-    // Unabhängige Supabase-Abfragen parallel ausführen statt nacheinander abzuwarten.
-    const [listings, favorites, messages, reviews, profileResult] = await Promise.all([
-      getListings({ includeArchived: true }),
+    // Nutzerspezifische Daten erst nach erfolgreicher Anmeldung laden.
+    const [favorites, messages, reviews, profileResult] = await Promise.all([
       getFavorites(),
       getMessages(),
       getReviews(),
       db.from("profiles").select("id,display_name,avatar_url")
     ]);
-    localStorage.setItem("anzeigen", JSON.stringify(listings));
     localStorage.setItem("favoriten-" + user.id, JSON.stringify(favorites));
 
     const profileById = new Map(
