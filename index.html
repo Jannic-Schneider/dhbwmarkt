@@ -1494,11 +1494,16 @@
         return "";
       }
 
+      // Supabase liefert das Profilbild direkt mit der Anzeige.
+      // Der localStorage-Fallback bleibt für ältere lokale Daten erhalten.
       return (
+        anzeige.ownerAvatarUrl ||
+        anzeige.profileImage ||
         localStorage.getItem(
           "profileImage-" +
           anzeige.ownerId
-        ) || ""
+        ) ||
+        ""
       );
     }
 
