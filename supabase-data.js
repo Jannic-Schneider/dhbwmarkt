@@ -73,6 +73,23 @@
     return rows.map((row) => mapListing({ ...row, profiles: profileMap.get(String(row.owner_id)) || {} }));
   }
 
+  async function uploadImageIfNeeded(dataUrl, folder) {
+    if (!dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) return dataUrl || "";
+    const user = await currentUser();
+    if (!user) throw new Error("Bitte melde dich zuerst an.");
+    const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/);
+    if (!match) throw new Error("Bildformat nicht unterstützt. Bitte JPG, PNG oder WebP verwenden.");
+    const mime = match[1];
+    const ext = mime === "image/jpeg" ? "jpg" : mime.split("/")[1];
+    const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
+    const path = user.id + "/" + folder + "-" + crypto.randomUUID() + "." + ext;
+    const { error } = await client().storage.from("anzeigenbilder").upload(path, new Blob([bytes], { type: mime }), {
+      contentType: mime, upsert: false
+    });
+    if (error) throw new Error("Bild-Upload fehlgeschlagen. Prüfe den Bucket 'anzeigenbilder' und seine Policies: " + error.message);
+    return client().storage.from("anzeigenbilder").getPublicUrl(path).data.publicUrl;
+  }
+
   async function saveListing(listing, existingId) {
     const db = client();
     const user = await currentUser();
@@ -87,7 +104,7 @@
       wohnheim: listing.wohnheim || "",
       zustand: listing.zustand || "",
       beschreibung: listing.beschreibung || "",
-      bilder: Array.isArray(listing.bilder) ? listing.bilder : [],
+      bilder: await Promise.all((Array.isArray(listing.bilder) ? listing.bilder : []).map((image, index) => uploadImageIfNeeded(image, "anzeige-" + index))),
       status: listing.status || "active",
       updated_at: new Date().toISOString()
     };
@@ -287,7 +304,7 @@
     const patch = {};
     if (fields.name !== undefined) patch.display_name = String(fields.name).trim();
     if (fields.wohnheim !== undefined) patch.wohnheim = String(fields.wohnheim);
-    if (fields.avatar_url !== undefined) patch.avatar_url = String(fields.avatar_url);
+    if (fields.avatar_url !== undefined) patch.avatar_url = await uploadImageIfNeeded(String(fields.avatar_url), "profilbild");
     if (Object.keys(patch).length) {
       const { error } = await client().from("profiles").update(patch).eq("id", user.id);
       if (error) throw error;
