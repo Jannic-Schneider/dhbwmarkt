@@ -1347,6 +1347,11 @@
             window.location.href = "index.html";
             return;
           }
+          // Benutzerverwaltung benötigt eine sichere Serverfunktion und wird bis dahin ausgeblendet.
+          const userTab = document.querySelector('[data-tab="benutzer"]');
+          const userPanel = document.getElementById("panel-benutzer");
+          if (userTab) userTab.hidden = true;
+          if (userPanel) userPanel.hidden = true;
           alleNeuZeichnen();
         } catch (error) {
           console.error(error);
