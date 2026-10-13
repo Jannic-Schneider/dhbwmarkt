@@ -2210,6 +2210,10 @@ function ladeGespeichertesTheme() {
 
       const jetztFavorit =
         wechsleFavorit(herz.dataset.favId);
+      window.DHBWMarktData.setFavorite(herz.dataset.favId, jetztFavorit).catch(function (error) {
+        console.error(error);
+        window.alert("Der Favorit konnte nicht in der Datenbank gespeichert werden.");
+      });
 
       // In der Favoritenansicht muss die Karte verschwinden
       if (nurFavoriten) {
@@ -2489,10 +2493,14 @@ function ladeGespeichertesTheme() {
     // ==================================================
 
     ladeGespeichertesTheme();
-    ladeProfilbildImHeader();
     renderKategorien();
-    renderAnzeigen();
-    aktualisiereNachrichtenBadge();
+    (async function starteGemeinsameDaten() {
+      try { await window.DHBWMarktData.bootstrapCache(); }
+      catch (error) { console.error("Supabase-Daten konnten nicht geladen werden:", error); }
+      ladeProfilbildImHeader();
+      renderAnzeigen();
+      aktualisiereNachrichtenBadge();
+    })();
   </script>
 </body>
 </html>
