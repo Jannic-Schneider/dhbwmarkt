@@ -1073,6 +1073,8 @@ form.addEventListener("submit", async function (event) {
   submitBtn.disabled = true;
   try {
     const savedId = await window.DHBWMarktData.saveListing(anzeigeDaten, zuBearbeitendeAnzeige ? zuBearbeitendeAnzeige.id : null);
+    // Für die Weiterleitung die tatsächliche Supabase-ID statt der temporären lokalen ID verwenden.
+    gespeicherteAnzeigeId = savedId;
     const gespeicherte = { ...anzeigeDaten, id: savedId, ownerId: loggedInUser.id,
       ownerName: loggedInUser.name || loggedInUser.email, ownerEmail: loggedInUser.email,
       erstelltAm: zuBearbeitendeAnzeige ? zuBearbeitendeAnzeige.erstelltAm : new Date().toISOString() };
