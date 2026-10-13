@@ -1636,23 +1636,49 @@ if (deleteButton) {
     urlParameter.get("id");
 
 
-  // Passende Anzeige über ihre ID finden
-  const ausgewaehlteAnzeige =
-    anzeigen.find(function (anzeige) {
-      return String(anzeige.id) === String(anzeigenId);
-    });
-
-
-  // Gemeinsame Daten laden, bevor die Anzeige dargestellt wird.
+  // Anzeige erst nach dem Laden der gemeinsamen Daten suchen.
+  // Falls der Cache direkt nach dem Veröffentlichen noch veraltet ist,
+  // die konkrete Anzeige einmal direkt aus Supabase nachladen.
   (async function ladeGemeinsameAnzeige() {
+    let aktuelleAnzeige = null;
+
     try {
       await window.DHBWMarktData.bootstrapCache();
       anzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
+      aktuelleAnzeige = anzeigen.find(function (a) {
+        return String(a.id) === String(anzeigenId);
+      });
+
+      if (!aktuelleAnzeige && anzeigenId) {
+        const direktGeladen = await window.DHBWMarktData.getListings({
+          id: anzeigenId,
+          includeArchived: true
+        });
+        aktuelleAnzeige = direktGeladen.find(function (a) {
+          return String(a.id) === String(anzeigenId);
+        }) || null;
+
+        if (aktuelleAnzeige) {
+          anzeigen = [aktuelleAnzeige].concat(anzeigen.filter(function (a) {
+            return String(a.id) !== String(aktuelleAnzeige.id);
+          }));
+          localStorage.setItem("anzeigen", JSON.stringify(anzeigen));
+        }
+      }
     } catch (error) {
       console.error("Supabase-Daten konnten nicht geladen werden:", error);
+      // Ein bereits vorhandener Cache-Eintrag darf trotzdem angezeigt werden.
+      anzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
+      aktuelleAnzeige = anzeigen.find(function (a) {
+        return String(a.id) === String(anzeigenId);
+      }) || null;
     }
-    const aktuelleAnzeige = anzeigen.find(function (a) { return String(a.id) === String(anzeigenId); });
-    if (aktuelleAnzeige) zeigeAnzeige(aktuelleAnzeige); else zeigeFehler();
+
+    if (aktuelleAnzeige) {
+      zeigeAnzeige(aktuelleAnzeige);
+    } else {
+      zeigeFehler();
+    }
   })();
 
 function istNacht() {
