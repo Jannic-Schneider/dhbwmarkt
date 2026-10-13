@@ -52,7 +52,7 @@
     const db = client();
     let query = db
       .from("anzeigen")
-      .select("id,owner_id,title,price,tausch,kategorie,wohnheim,zustand,beschreibung,bilder,status,created_at,updated_at,profiles(display_name,wohnheim,avatar_url)")
+      .select("id,owner_id,title,price,tausch,kategorie,wohnheim,zustand,beschreibung,bilder,status,created_at,updated_at")
       .order("created_at", { ascending: false });
 
     if (!opts.includeArchived) query = query.eq("status", "active");
@@ -61,7 +61,16 @@
 
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map(mapListing);
+    const rows = data || [];
+    const ownerIds = [...new Set(rows.map((row) => row.owner_id).filter(Boolean))];
+    let profileMap = new Map();
+    if (ownerIds.length) {
+      const { data: profiles, error: profileError } = await db
+        .from("profiles").select("id,display_name,wohnheim,avatar_url").in("id", ownerIds);
+      if (profileError) throw profileError;
+      profileMap = new Map((profiles || []).map((profile) => [String(profile.id), profile]));
+    }
+    return rows.map((row) => mapListing({ ...row, profiles: profileMap.get(String(row.owner_id)) || {} }));
   }
 
   async function saveListing(listing, existingId) {
