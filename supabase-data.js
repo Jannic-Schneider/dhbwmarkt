@@ -266,12 +266,20 @@
 
   async function bootstrapCache() {
     const db = client();
-    const user = await currentUser();
 
-    // Aktive Anzeigen sind öffentlich: zuerst unabhängig vom Login laden.
-    // Die Startseite darf nicht davon abhängen, ob ein Nutzer angemeldet ist.
+    // Öffentliche Anzeigen zuerst laden. Authentifizierungsprüfungen dürfen
+    // das Anzeigen der öffentlichen Startseite niemals blockieren.
     const listings = await getListings();
     localStorage.setItem("anzeigen", JSON.stringify(listings));
+
+    let user = null;
+    try {
+      user = await currentUser();
+    } catch (authError) {
+      // Fehlende oder abgelaufene Sitzung bedeutet für die Startseite:
+      // Besucher ohne Anmeldung. Öffentliche Anzeigen bleiben sichtbar.
+      console.warn("Keine aktive Anmeldung; öffentliche Anzeigen bleiben verfügbar.", authError);
+    }
 
     if (!user) {
       localStorage.removeItem("loggedInUser");
