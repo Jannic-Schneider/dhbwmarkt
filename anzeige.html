@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anzeige | dhbwmarkt</title>
+
+  <style>
+
+    /* Lightmode */
+    :root {
+      --red: #e2001a;
+      --red-dark: #b40014;
+      --black: #1a1a1a;
+      --grey: #5f5f5f;
+      --background: #f5f5f5;
+      --border: #e1e1e1;
+      --white: #ffffff;
+    }
+    body.dark-mode {
+  --black: #f5f5f5;
+  --ink: #f5f5f5;
+  --ink-soft: #b8b8b8;
+  --bg: #181818;
+  --bg-alt: #101010;
+  --border: #383838;
+  --border-strong: #555555;
+}
+/* Darkmode */
+body.dark-mode {
+  background: var(--bg-alt);
+  color: var(--ink);
+}
+
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .burger-menu,
+body.dark-mode .searchbar input {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body.dark-mode .searchbar {
+  border-color: var(--border-strong);
+}
+
+body.dark-mode .card {
+  border-color: var(--border);
+}
+
+body.dark-mode .card-title,
+body.dark-mode .card-price,
+body.dark-mode .logo .rest,
+body.dark-mode .link-btn,
+body.dark-mode .user-name {
+  color: var(--ink);
+}
+
+body.dark-mode .theme-button {
+  background: #fff;
+  color: #1a1a1a;
+  border-color: #fff;
+}
+
+body.dark-mode .logout-btn {
+  background: transparent;
+}
+
+body.dark-mode .empty-state h3 {
+  color: var(--ink);
+}
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--black);
+      background: var(--background);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--red);
+      outline-offset: 2px;
+    }
+
+    .header {
+      padding: 16px 20px;
+      background: var(--white);
+      border-bottom: 3px solid var(--red);
+    }
+
+    .header-content {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo {
+      color: var(--black);
+      font-size: 26px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .logo-red {
+      color: var(--red);
+    }
+
+    .back-link {
+      color: var(--red);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 35px 20px 70px;
+      flex: 1;
+    }
+
+    .detail-card {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) 1fr;
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 5px 22px rgba(0, 0, 0, 0.08);
+    }
+
+    .detail-image {
+      min-height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      color: var(--white);
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .detail-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+    .detail-content {
+      padding: 36px;
+    }
+
+    .category {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 5px 10px;
+      color: var(--white);
+      background: var(--black);
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .detail-title {
+      margin: 0 0 14px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .detail-price {
+      margin-bottom: 24px;
+      color: var(--red);
+      font-size: 25px;
+      font-weight: 700;
+    }
+
+    .information {
+      margin: 0 0 24px;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .information li {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .information-label {
+      color: var(--grey);
+    }
+
+    .information-value {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .description-title {
+      margin: 28px 0 10px;
+      font-size: 18px;
+    }
+
+    .description {
+      margin: 0;
+      color: var(--grey);
+      line-height: 1.6;
+    }
+
+    .contact-button {
+      width: 100%;
+      margin-top: 28px;
+      padding: 13px 20px;
+      color: var(--white);
+      background: var(--red);
+      border: 0;
+      border-radius: 24px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .contact-button:hover {
+      background: var(--red-dark);
+    }
+
+    .action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.action-buttons .contact-button {
+  margin-top: 0;
+}
+
+.edit-button {
+  width: 100%;
+  padding: 13px 20px;
+  color: #ffffff;
+  background: #4a4a4a ;
+  border: 0;
+  border-radius: 24px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-button:hover{
+  background: #303030;
+}
+
+body.dark-mode .edit-button{
+  background: #555555;
+}
+
+body.dark-mode .edit-button:hover{
+  background: #6a6a6a;
+}
+
+.delete-button {
+  width: 100%;
+  padding: 13px 20px;
+  color: #fff;
+  background: #8b0000;
+  border: 0;
+  border-radius: 24px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #600000;
+}
+
+.detail-fav {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.detail-fav:hover {
+  transform: scale(1.08);
+}
+
+.detail-fav svg {
+  fill: none;
+  stroke: currentColor;
+}
+
+.detail-fav.active {
+  color: var(--red);
+}
+
+.detail-fav.active svg {
+  fill: currentColor;
+}
+
+@media (max-width: 520px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+
+    .error-message {
+      padding: 50px 25px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .error-message h1 {
+      margin-top: 0;
+    }
+
+    .error-message a {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .footer {
+      width: 100%;
+      padding: 20px;
+      color: var(--white);
+      background: var(--red);
+    }
+
+    .footer-content {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: 14px;
+    }
+
+    .footer a {
+      color: var(--white);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 750px) {
+      .detail-card {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-image {
+        min-height: 280px;
+      }
+
+      .detail-content {
+        padding: 25px 20px;
+      }
+
+      .detail-title {
+        font-size: 25px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-content {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .main {
+        padding: 20px 12px 50px;
+      }
+
+      .footer-content {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+/* Lightmode-Farben */
+
+.upload-field > label,
+.upload-header h2,
+.upload-preview-label {
+  color: var(--ink);
+}
+
+.upload-counter,
+.upload-hint {
+  color: var(--ink-soft);
+}
+
+.upload-preview-image {
+  background: var(--bg-alt);
+  color: var(--grey);
+}
+
+.upload-preview-title {
+  color: var(--ink);
+}
+
+.upload-preview-price {
+  color: var(--ink);
+}
+
+.upload-preview-meta {
+  color: var(--ink-soft);
+}
+
+.upload-image-add {
+  color: var(--ink-soft);
+  background: var(--bg-alt);
+  border-color: var(--border-strong);
+}
+
+
+    /* Darkmode für die Detailansicht */
+
+body.dark-mode {
+  --black: #f5f5f5;
+  --grey: #b8b8b8;
+  --background: #101010;
+  --border: #444444;
+  --white: #f8f8f8;
+
+  background: var(--background);
+  color: #ffffff;
+}
+
+body.dark-mode .header,
+body.dark-mode .detail-card {
+  background: #1c1c1c;
+  color: #f5f5f5;
+}
+
+body.dark-mode .detail-card {
+  border-color: #3d3d3d;
+}
+
+body.dark-mode .detail-title,
+body.dark-mode .description-title {
+  color: #f5f5f5;
+}
+
+body.dark-mode .description {
+  color: #d0d0d0;
+}
+
+body.dark-mode .information {
+  border-top-color: #555555;
+}
+
+body.dark-mode .information li {
+  border-bottom-color: #555555;
+}
+
+body.dark-mode .information-label {
+  color: #b8b8b8;
+}
+
+body.dark-mode .information-value {
+  color: #f5f5f5;
+}
+
+body.dark-mode .category {
+  background: #333333;
+  color: #ffffff;
+}
+
+body.dark-mode .logo {
+  color: #f5f5f5;
+}
+
+body.dark-mode .back-link {
+  color: #ff4055;
+}
+
+body.dark-mode .error-message {
+  background: #1c1c1c;
+  color: #f5f5f5;
+  border-color: #444444;
+}
+
+.seller-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.seller-profile-image,
+.seller-profile-placeholder {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.seller-profile-image {
+  display: block;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.seller-profile-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+  background: var(--red);
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.gallery-btn {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  transform: translateY(-50%);
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  border: 0;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+}
+.gallery-btn:hover { background: var(--red); }
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
+
+.gallery-thumbs {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  overflow-x: auto;
+  background: rgba(0, 0, 0, 0.45);
+}
+.gallery-thumb {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+.gallery-thumb.active {
+  border-color: var(--red);
+  opacity: 1;
+}
+.gallery-thumb img {
+  position: static;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Bewertungen */
+.stars { color: #f5a623; letter-spacing: 1px; }
+
+.seller-rating { display: block; font-size: 12px; font-weight: 400; color: var(--grey); }
+
+.rating-box {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.rating-box h2 { margin: 0 0 12px; font-size: 18px; }
+
+.rating-note { margin: 0 0 14px; color: var(--grey); font-size: 14px; }
+
+.star-input { display: flex; gap: 4px; margin-bottom: 10px; }
+
+.star-input button {
+  padding: 0;
+  color: #c7c7c7;
+  background: none;
+  border: 0;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.star-input button.on { color: #f5a623; }
+
+.rating-form textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font: inherit;
+  resize: vertical;
+}
+
+.rating-submit {
+  margin-top: 10px;
+  padding: 10px 20px;
+  color: #fff;
+  background: var(--red);
+  border: 0;
+  border-radius: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rating-submit:hover { background: var(--red-dark); }
+
+.rating-list { margin: 18px 0 0; padding: 0; list-style: none; }
+
+.rating-item { padding: 12px 0; border-top: 1px solid var(--border); font-size: 14px; }
+
+.rating-item-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+
+.rating-item p { margin: 4px 0 0; color: var(--grey); }
+
+.rating-delete {
+  color: var(--red);
+  background: none;
+  border: 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-content">
+      <a class="logo" href="index.html">
+        <span class="logo-red">dhbw</span>markt
+      </a>
+
+      <a class="back-link" href="index.html">
+        Zurück zur Hauptseite
+      </a>
+    </div>
+  </header>
+
+  <main class="main" id="mainContent"></main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>&copy; 2026 dhbwmarkt</span>
+      <a href="impressum.html">Impressum</a>
+    </div>
+  </footer>
+
+ <script>
+  "use strict";
+
+  // Anzeigen aus dem gemeinsamen localStorage laden
+  const anzeigen = JSON.parse(
+    localStorage.getItem("anzeigen")
+  ) || [];
+
+  const registrierteBenutzer = JSON.parse(
+  localStorage.getItem("registeredUsers")
+) || [];
+
+const standardBenutzer = [
+  {
+    id: "user-admin",
+    name: "Administrator",
+    email: "admin@dhbw.de"
+  },
+  {
+    id: "user-max",
+    name: "Max Mustermann",
+    email: "max@dhbw.de"
+  },
+  {
+    id: "user-lisa",
+    name: "Lisa Müller",
+    email: "lisa@dhbw.de"
+  },
+  {
+    id: "user-tom",
+    name: "Tom Schneider",
+    email: "tom@dhbw.de"
+  }
+];
+
+const alleBenutzer = [
+  ...standardBenutzer,
+  ...registrierteBenutzer
+];
+
+  const loggedInUser = JSON.parse(
+  localStorage.getItem("loggedInUser")
+);
+
+  // Farben passend zu den Kategorie-IDs
+  const kategoriefarben = {
+    moebel: "#4A4A4A",
+    elektronik: "#1A1A1A",
+    buecher: "#7A7A7A",
+    kueche: "#B40014",
+    fahrrad: "#2E2E2E",
+    kleidung: "#E2001A",
+    sonstiges: "#5F5F5F"
+  };
+
+  // Anzeigenamen passend zu den Kategorie-IDs
+  const kategorienamen = {
+    moebel: "Möbel",
+    elektronik: "Elektronik",
+    buecher: "Bücher & Skripte",
+    kueche: "Küche",
+    fahrrad: "Fahrrad",
+    kleidung: "Kleidung",
+    sonstiges: "Sonstiges"
+  };
+
+  const mainContent =
+    document.getElementById("mainContent");
+
+
+  // Texte sicher in HTML einfügen
+  function escapeHtml(text) {
+    return String(text ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
+  // Preis lesbar darstellen
+  function preisText(anzeige) {
+    if (anzeige.tausch) {
+      return "Zum Tausch";
+    }
+
+    const preis = Number(anzeige.price);
+
+    if (preis === 0) {
+      return "Zu verschenken";
+    }
+
+    if (!Number.isFinite(preis)) {
+      return "Preis auf Anfrage";
+    }
+
+    return preis.toFixed(2).replace(".", ",") + " €";
+  }
+
+
+  // Lesbaren Kategorienamen bestimmen
+  function kategorieName(kategorie) {
+    return kategorienamen[kategorie] || kategorie || "Sonstiges";
+  }
+
+
+  // Passende Farbe bestimmen
+  function kategorieFarbe(kategorie) {
+    return kategoriefarben[kategorie] || "#5F5F5F";
+  }
+
+
+  // Fehler anzeigen, wenn keine passende Anzeige gefunden wurde
+  function zeigeFehler() {
+    mainContent.innerHTML = `
+      <section class="error-message">
+        <h1>Anzeige nicht gefunden</h1>
+
+        <p>
+          Die gewünschte Anzeige existiert nicht
+          oder wurde entfernt.
+        </p>
+
+        <a href="index.html">
+          Zurück zur Hauptseite
+        </a>
+      </section>
+    `;
+  }
+
+
+  // Passende Anzeige darstellen
+
+  function darfAnzeigeVerwalten(anzeige) {
+  if (!loggedInUser) {
+    return false;
+  }
+
+  const istAdmin =
+    loggedInUser.role === "admin";
+
+  const istEigentuemer =
+    String(anzeige.ownerId) ===
+    String(loggedInUser.id);
+
+  return istAdmin || istEigentuemer;
+}
+
+function loescheAnzeige(anzeige) {
+  if (!darfAnzeigeVerwalten(anzeige)) {
+    window.alert(
+      "Du darfst diese Anzeige nicht löschen."
+    );
+
+    return;
+  }
+
+  const wirklichLoeschen = window.confirm(
+    "Möchtest du diese Anzeige wirklich löschen?"
+  );
+
+  if (!wirklichLoeschen) {
+    return;
+  }
+
+  const aktuelleAnzeigen = JSON.parse(
+    localStorage.getItem("anzeigen")
+  ) || [];
+
+  const verbleibendeAnzeigen =
+    aktuelleAnzeigen.filter(function (eintrag) {
+      return String(eintrag.id) !==
+        String(anzeige.id);
+    });
+
+  localStorage.setItem(
+    "anzeigen",
+    JSON.stringify(verbleibendeAnzeigen)
+  );
+
+  window.alert("Die Anzeige wurde gelöscht.");
+
+  window.location.href = "index.html";
+}
+
+function findeVerkaeufer(anzeige) {
+  const verkaeufer = alleBenutzer.find(
+    function (benutzer) {
+      return String(benutzer.id) ===
+        String(anzeige.ownerId);
+    }
+  );
+
+  return verkaeufer || null;
+}
+
+function formatiereZeitabstand(zeitstempel) {
+  if (!zeitstempel) {
+    return "Keine Angabe";
+  }
+
+  const datum = new Date(zeitstempel);
+
+  if (Number.isNaN(datum.getTime())) {
+    return "Keine Angabe";
+  }
+
+  const jetzt = new Date();
+
+  const differenzInMillisekunden =
+    jetzt.getTime() - datum.getTime();
+
+  const differenzInMinuten = Math.floor(
+    differenzInMillisekunden / 60000
+  );
+
+  const differenzInStunden = Math.floor(
+    differenzInMinuten / 60
+  );
+
+  const differenzInTagen = Math.floor(
+    differenzInStunden / 24
+  );
+
+  const differenzInWochen = Math.floor(
+    differenzInTagen / 7
+  );
+
+  const differenzInMonaten = Math.floor(
+    differenzInTagen / 30
+  );
+
+  if (differenzInMillisekunden < 0) {
+    return "Gerade eben";
+  }
+
+  if (differenzInMinuten < 1) {
+    return "Gerade eben";
+  }
+
+  if (differenzInMinuten === 1) {
+    return "vor 1 Minute";
+  }
+
+  if (differenzInMinuten < 60) {
+    return "vor " + differenzInMinuten + " Minuten";
+  }
+
+  if (differenzInStunden === 1) {
+    return "vor 1 Stunde";
+  }
+
+  if (differenzInStunden < 24) {
+    return "vor " + differenzInStunden + " Stunden";
+  }
+
+  if (differenzInTagen === 1) {
+    return "vor 1 Tag";
+  }
+
+  if (differenzInTagen < 7) {
+    return "vor " + differenzInTagen + " Tagen";
+  }
+
+  if (differenzInWochen === 1) {
+    return "vor 1 Woche";
+  }
+
+  if (differenzInTagen < 30) {
+    return "vor " + differenzInWochen + " Wochen";
+  }
+
+  if (differenzInMonaten === 1) {
+    return "vor 1 Monat";
+  }
+
+  if (differenzInTagen < 365) {
+    return "vor " + differenzInMonaten + " Monaten";
+  }
+
+  const differenzInJahren = Math.floor(
+    differenzInTagen / 365
+  );
+
+  if (differenzInJahren === 1) {
+    return "vor 1 Jahr";
+  }
+
+  return "vor " + differenzInJahren + " Jahren";
+}
+
+function favoritenKey() {
+  return loggedInUser
+    ? "favoriten-" + loggedInUser.id
+    : null;
+}
+
+function ladeFavoriten() {
+  const key = favoritenKey();
+
+  if (!key) {
+    return [];
+  }
+
+  try {
+    const liste = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(liste) ? liste : [];
+  } catch (fehler) {
+    return [];
+  }
+}
+
+function wechsleFavorit(id) {
+  const idText = String(id);
+  let liste = ladeFavoriten();
+
+  if (liste.includes(idText)) {
+    liste = liste.filter(function (eintrag) {
+      return eintrag !== idText;
+    });
+  } else {
+    liste.push(idText);
+  }
+
+  localStorage.setItem(favoritenKey(), JSON.stringify(liste));
+}
+
+// ===== Bewertungen =====
+
+function ladeBewertungen() {
+  try {
+    const liste = JSON.parse(localStorage.getItem("bewertungen"));
+    return Array.isArray(liste) ? liste : [];
+  } catch (fehler) {
+    return [];
+  }
+}
+
+function speichereBewertungen(liste) {
+  localStorage.setItem("bewertungen", JSON.stringify(liste));
+}
+
+function bewertungenFuer(verkaeuferId) {
+  return ladeBewertungen().filter(function (b) {
+    return String(b.verkaeuferId) === String(verkaeuferId);
+  });
+}
+
+function durchschnittVon(liste) {
+  if (!liste.length) return 0;
+  const summe = liste.reduce(function (s, b) { return s + Number(b.sterne); }, 0);
+  return summe / liste.length;
+}
+
+function sterneText(wert) {
+  const voll = Math.round(wert);
+  return "★".repeat(voll) + "☆".repeat(5 - voll);
+}
+
+function renderBewertungen(anzeige) {
+  const box = document.getElementById("ratingBox");
+  const summary = document.getElementById("sellerRatingSummary");
+
+  if (!box) return;
+
+  if (!anzeige.ownerId) {
+    box.hidden = true;
+    return;
+  }
+
+  const verkaeuferId = String(anzeige.ownerId);
+
+  const liste = bewertungenFuer(verkaeuferId).sort(function (a, b) {
+    return new Date(b.erstelltAm) - new Date(a.erstelltAm);
+  });
+
+  const schnitt = durchschnittVon(liste);
+  const schnittText = schnitt.toFixed(1).replace(".", ",");
+
+  // Kurzfassung neben dem Verkäufernamen
+  if (summary) {
+    summary.innerHTML = liste.length
+      ? '<span class="stars">' + sterneText(schnitt) + "</span> " +
+        schnittText + " (" + liste.length + ")"
+      : "Noch keine Bewertungen";
+  }
+
+  const istEigener =
+    loggedInUser && String(loggedInUser.id) === verkaeuferId;
+
+  const meine = loggedInUser
+    ? liste.find(function (b) {
+        return String(b.bewerterId) === String(loggedInUser.id);
+      })
+    : null;
+
+  let formHtml = "";
+
+  if (!loggedInUser) {
+    formHtml =
+      '<p class="rating-note"><a href="anmeldeseite_regestrierung.html">Melde dich an</a>, um diesen Verkäufer zu bewerten.</p>';
+  } else if (istEigener) {
+    formHtml = '<p class="rating-note">Du kannst dich nicht selbst bewerten.</p>';
+  } else {
+    formHtml = `
+      <form class="rating-form" id="ratingForm">
+        <div class="star-input" id="starInput">
+          ${[1, 2, 3, 4, 5].map(function (n) {
+            return '<button type="button" data-stern="' + n +
+              '" aria-label="' + n + ' Sterne">★</button>';
+          }).join("")}
+        </div>
+        <textarea id="ratingComment" maxlength="300"
+          placeholder="Optionaler Kommentar (max. 300 Zeichen)"></textarea>
+        <button class="rating-submit" type="submit">
+          ${meine ? "Bewertung ändern" : "Bewertung abgeben"}
+        </button>
+      </form>
+    `;
+  }
+
+  const listeHtml = liste.length
+    ? '<ul class="rating-list">' + liste.map(function (b) {
+        const darfLoeschen =
+          loggedInUser &&
+          (loggedInUser.role === "admin" ||
+            String(loggedInUser.id) === String(b.bewerterId));
+
+        return `
+          <li class="rating-item">
+            <div class="rating-item-head">
+              <span>
+                <strong>${escapeHtml(b.bewerterName || "Unbekannt")}</strong>
+                <span class="stars">${sterneText(b.sterne)}</span>
+              </span>
+              ${darfLoeschen
+                ? '<button class="rating-delete" type="button" data-delete-rating="' +
+                  escapeHtml(b.id) + '">Löschen</button>'
+                : ""}
+            </div>
+            ${b.kommentar ? "<p>" + escapeHtml(b.kommentar) + "</p>" : ""}
+          </li>
+        `;
+      }).join("") + "</ul>"
+    : "";
+
+  box.innerHTML = `
+    <h2>Bewertungen für ${escapeHtml(anzeige.ownerName || "Verkäufer")}</h2>
+    <p class="rating-note">
+      ${liste.length
+        ? '<span class="stars">' + sterneText(schnitt) + "</span> " +
+          schnittText + " von 5 (" + liste.length + " Bewertung" +
+          (liste.length === 1 ? "" : "en") + ")"
+        : "Noch keine Bewertungen vorhanden."}
+    </p>
+    ${formHtml}
+    ${listeHtml}
+  `;
+
+  // Sterne-Auswahl und Formular
+  const form = document.getElementById("ratingForm");
+
+  if (form) {
+    let gewaehlt = meine ? Number(meine.sterne) : 0;
+    const sterne = form.querySelectorAll("[data-stern]");
+    const kommentarFeld = document.getElementById("ratingComment");
+
+    if (meine) kommentarFeld.value = meine.kommentar || "";
+
+    function zeigeSterne() {
+      sterne.forEach(function (button) {
+        button.classList.toggle("on", Number(button.dataset.stern) <= gewaehlt);
+      });
+    }
+
+    sterne.forEach(function (button) {
+      button.addEventListener("click", function () {
+        gewaehlt = Number(button.dataset.stern);
+        zeigeSterne();
+      });
+    });
+
+    zeigeSterne();
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      if (gewaehlt < 1) {
+        window.alert("Bitte wähle mindestens einen Stern aus.");
+        return;
+      }
+
+      const alle = ladeBewertungen();
+
+      const index = alle.findIndex(function (b) {
+        return String(b.verkaeuferId) === verkaeuferId &&
+          String(b.bewerterId) === String(loggedInUser.id);
+      });
+
+      const eintrag = {
+        id: index !== -1 ? alle[index].id : "bew-" + Date.now(),
+        verkaeuferId: verkaeuferId,
+        bewerterId: loggedInUser.id,
+        bewerterName: loggedInUser.name || loggedInUser.email,
+        sterne: gewaehlt,
+        kommentar: kommentarFeld.value.trim(),
+        erstelltAm: new Date().toISOString()
+      };
+
+      if (index !== -1) {
+        alle[index] = eintrag;
+      } else {
+        alle.push(eintrag);
+      }
+
+      speichereBewertungen(alle);
+      renderBewertungen(anzeige);
+    });
+  }
+
+  // Bewertung löschen
+  box.querySelectorAll("[data-delete-rating]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      if (!window.confirm("Bewertung wirklich löschen?")) return;
+
+      const verbleibend = ladeBewertungen().filter(function (b) {
+        return String(b.id) !== String(button.dataset.deleteRating);
+      });
+
+      speichereBewertungen(verbleibend);
+      renderBewertungen(anzeige);
+    });
+  });
+}
+
+  function zeigeAnzeige(anzeige) {
+    const verkaeufer =
+  findeVerkaeufer(anzeige);
+
+// Gibt die Zeit des Erstellens an
+  const erstelltVor =
+  formatiereZeitabstand(anzeige.erstelltAm);
+
+const bearbeitetVor =
+  anzeige.bearbeitetAm
+    ? formatiereZeitabstand(anzeige.bearbeitetAm)
+    : "";
+
+
+const verkaeufername =
+  verkaeufer
+    ? verkaeufer.name: "Unbekannter Verkäufer";
+
+    const farbe =
+      kategorieFarbe(anzeige.kategorie);
+
+    const kategorie =
+      kategorieName(anzeige.kategorie);
+
+    const wohnheim =
+      anzeige.wohnheim || "Keine Angabe";
+
+    const zustand =
+      anzeige.zustand || "Keine Angabe";
+
+    const beschreibung =
+      anzeige.beschreibung ||
+      "Für diese Anzeige wurde noch keine Beschreibung hinterlegt.";
+
+      const verkaeuferName =
+  anzeige.ownerName || "Unbekannter Verkäufer";
+
+  const verkaeuferBild =
+  anzeige.ownerId
+    ? localStorage.getItem(
+        "profileImage-" + anzeige.ownerId
+      ) || ""
+    : "";
+``
+
+  const verkaeuferEmail =
+  anzeige.ownerEmail ||
+  "Keine Verkäuferangabe";
+    mainContent.innerHTML = `
+      <article class="detail-card">
+
+        <div
+            class="detail-image"
+            id="detailImage"
+             style="background: ${escapeHtml(farbe)}"
+          >
+           ${escapeHtml(kategorie)}
+        </div>
+
+        <div class="detail-content">
+
+          <span class="category">
+            ${escapeHtml(kategorie)}
+          </span>
+
+          <h1 class="detail-title">
+            ${escapeHtml(anzeige.title)}
+          </h1>
+
+          <div class="detail-price">
+            ${escapeHtml(preisText(anzeige))}
+          </div>
+
+          <ul class="information">
+<li>
+  <span class="information-label">
+    Verkäufer
+  </span>
+
+  <span class="information-value seller-value">
+    ${
+      verkaeuferBild
+        ? `
+          <img
+            class="seller-profile-image"
+            src="${escapeHtml(verkaeuferBild)}"
+            alt="Profilbild von ${escapeHtml(verkaeuferName)}"
+          >
+        `
+        : `
+          <span class="seller-profile-placeholder">
+            ${escapeHtml(
+              verkaeuferName
+                .trim()
+                .charAt(0)
+                .toUpperCase()
+            )}
+          </span>
+        `
+    }
+
+     <span>
+      ${escapeHtml(verkaeuferName)}
+      <span class="seller-rating" id="sellerRatingSummary"></span>
+    </span>
+  </span>
+</li>
+
+  <li>
+    <span class="information-label">
+      Standort
+    </span>
+
+    <span class="information-value">
+      ${escapeHtml(wohnheim)}
+    </span>
+  </li>
+
+  <li>
+    <span class="information-label">
+      Zustand
+    </span>
+
+    <span class="information-value">
+      ${escapeHtml(zustand)}
+    </span>
+  </li>
+
+  <li>
+    <span class="information-label">
+      Erstellt
+    </span>
+
+    <span class="information-value">
+      ${escapeHtml(erstelltVor)}
+    </span>
+  </li>
+
+  ${
+    bearbeitetVor
+      ? `
+        <li>
+          <span class="information-label">
+            Zuletzt bearbeitet
+          </span>
+
+          <span class="information-value">
+            ${escapeHtml(bearbeitetVor)}
+          </span>
+        </li>
+      `
+      : ""
+  }
+
+  <li>
+    <span class="information-label">
+      Anzeigen-ID
+    </span>
+
+    <span class="information-value">
+      ${escapeHtml(anzeige.id)}
+    </span>
+  </li>
+</ul>
+
+          <h2 class="description-title">
+            Beschreibung
+          </h2>
+
+          <p class="description">
+            ${escapeHtml(beschreibung)}
+          </p>
+
+      <section class="rating-box" id="ratingBox"></section>
+
+<div class="action-buttons">
+  <button
+    class="contact-button"
+    id="contactButton"
+    type="button"
+  >
+    Verkäufer kontaktieren
+  </button>
+
+  ${
+    darfAnzeigeVerwalten(anzeige)
+      ? `
+        <button
+          class="edit-button"
+          id="editButton"
+          type="button"
+        >
+          Anzeige bearbeiten
+        </button>
+
+        <button
+          class="delete-button"
+          id="deleteButton"
+          type="button"
+        >
+          Anzeige löschen
+        </button>
+      `
+      : ""
+  }
+</div>
+
+        </div>
+      </article>
+    `;
+
+//Bearbeitungs Knopf
+const editButton =
+  document.getElementById("editButton");
+
+if (editButton) {
+  editButton.addEventListener("click", function () {
+    window.location.href =
+      "verkauf.html?edit=" +
+      encodeURIComponent(anzeige.id);
+  });
+}
+
+
+    // Bild anzeigen, wenn die Anzeige ein Bild besitzt
+// Bildergalerie
+const bilder =
+  Array.isArray(anzeige.bilder) && anzeige.bilder.length
+    ? anzeige.bilder
+    : (anzeige.bild ? [anzeige.bild] : []);
+
+if (bilder.length > 0) {
+  const detailImage = document.getElementById("detailImage");
+  detailImage.textContent = "";
+
+  const hauptBild = document.createElement("img");
+  hauptBild.alt = anzeige.title || "";
+  detailImage.appendChild(hauptBild);
+
+  const thumbs = [];
+  let aktuell = 0;
+
+  function zeigeBild(index) {
+    aktuell = (index + bilder.length) % bilder.length;
+    hauptBild.src = bilder[aktuell];
+    thumbs.forEach(function (thumb, n) {
+      thumb.classList.toggle("active", n === aktuell);
+    });
+  }
+
+  if (bilder.length > 1) {
+    const zurueck = document.createElement("button");
+    zurueck.type = "button";
+    zurueck.className = "gallery-btn gallery-prev";
+    zurueck.setAttribute("aria-label", "Vorheriges Bild");
+    zurueck.textContent = "‹";
+    zurueck.addEventListener("click", function () { zeigeBild(aktuell - 1); });
+
+    const weiter = document.createElement("button");
+    weiter.type = "button";
+    weiter.className = "gallery-btn gallery-next";
+    weiter.setAttribute("aria-label", "Nächstes Bild");
+    weiter.textContent = "›";
+    weiter.addEventListener("click", function () { zeigeBild(aktuell + 1); });
+
+    const leiste = document.createElement("div");
+    leiste.className = "gallery-thumbs";
+
+    bilder.forEach(function (quelle, index) {
+      const thumb = document.createElement("button");
+      thumb.type = "button";
+      thumb.className = "gallery-thumb";
+      thumb.setAttribute("aria-label", "Bild " + (index + 1) + " anzeigen");
+
+      const vorschau = document.createElement("img");
+      vorschau.src = quelle;
+      vorschau.alt = "";
+
+      thumb.appendChild(vorschau);
+      thumb.addEventListener("click", function () { zeigeBild(index); });
+      leiste.appendChild(thumb);
+      thumbs.push(thumb);
+    });
+
+    detailImage.appendChild(zurueck);
+    detailImage.appendChild(weiter);
+    detailImage.appendChild(leiste);
+  }
+
+  zeigeBild(0);
+}
+
+    const contactButton =
+      document.getElementById("contactButton");
+// Kontakt Button öffnet Outlook und fügt die Email Adresse automatisch ein.
+     // Kontakt-Button öffnet den Chat mit dem Verkäufer
+    contactButton.addEventListener("click", function () {
+      if (!loggedInUser) {
+        window.location.href = "anmeldeseite_regestrierung.html";
+        return;
+      }
+
+      const verkaeuferId =
+        anzeige.ownerId ||
+        (verkaeufer && verkaeufer.id);
+
+      if (!verkaeuferId) {
+        window.alert("Für diese Anzeige ist kein Verkäufer hinterlegt.");
+        return;
+      }
+
+      // Eigene Anzeige: nur zur Nachrichtenübersicht
+      if (String(verkaeuferId) === String(loggedInUser.id)) {
+        window.location.href = "nachrichten.html";
+        return;
+      }
+
+      window.location.href =
+        "nachrichten.html?anzeige=" + encodeURIComponent(anzeige.id) +
+        "&an=" + encodeURIComponent(verkaeuferId);
+    });
+
+    const deleteButton =
+  document.getElementById("deleteButton");
+
+if (deleteButton) {
+  deleteButton.addEventListener(
+    "click",
+    function () {
+      loescheAnzeige(anzeige);
+    }
+  );
+}
+
+    // Favoriten-Herz
+    const favButton = document.createElement("button");
+    favButton.type = "button";
+    favButton.className = "detail-fav";
+    favButton.innerHTML = `
+      <svg width="22" height="22" viewBox="0 0 24 24"
+           stroke-width="2.2" stroke-linecap="round"
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    `;
+
+    function aktualisiereFavButton() {
+      const aktiv = ladeFavoriten().includes(String(anzeige.id));
+
+      favButton.classList.toggle("active", aktiv);
+      favButton.setAttribute("aria-pressed", String(aktiv));
+      favButton.setAttribute(
+        "aria-label",
+        aktiv ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"
+      );
+    }
+
+    favButton.addEventListener("click", function () {
+      if (!loggedInUser) {
+        window.location.href = "anmeldeseite_regestrierung.html";
+        return;
+      }
+
+      wechsleFavorit(anzeige.id);
+      aktualisiereFavButton();
+    });
+
+    document.getElementById("detailImage").appendChild(favButton);
+    renderBewertungen(anzeige);
+  }
+
+
+  // ID der Anzeige aus der URL lesen
+  const urlParameter =
+    new URLSearchParams(window.location.search);
+
+  const anzeigenId =
+    urlParameter.get("id");
+
+
+  // Passende Anzeige über ihre ID finden
+  const ausgewaehlteAnzeige =
+    anzeigen.find(function (anzeige) {
+      return String(anzeige.id) === String(anzeigenId);
+    });
+
+
+  // Anzeige oder Fehlermeldung darstellen
+  if (ausgewaehlteAnzeige) {
+    zeigeAnzeige(ausgewaehlteAnzeige);
+  } else {
+    zeigeFehler();
+  }
+
+function istNacht() {
+  const test = localStorage.getItem("testNacht");
+  if (test === "an") return true;
+  if (test === "aus") return false;
+
+  const stunde = new Date().getHours();
+  return stunde >= 20 || stunde < 7;
+}
+
+function ladeGespeichertesTheme() {
+  const auto = localStorage.getItem("autoTheme") === "on";
+
+  const dunkel = auto
+    ? istNacht()
+    : localStorage.getItem("theme") === "dark";
+
+  document.body.classList.toggle("dark-mode", dunkel);
+}
+
+ladeGespeichertesTheme();
+
+</script>
+</body>
+</html>

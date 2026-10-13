@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin-Dashboard | dhbwmarkt</title>
+
+  <style>
+    :root {
+      --red: #e2001a;
+      --red-dark: #b40014;
+      --ink: #1a1a1a;
+      --ink-soft: #5f5f5f;
+      --bg: #ffffff;
+      --bg-alt: #f5f5f5;
+      --border: #dedede;
+      --border-strong: #c7c7c7;
+    }
+
+    body.dark-mode {
+      --ink: #f5f5f5;
+      --ink-soft: #b8b8b8;
+      --bg: #1b1b1b;
+      --bg-alt: #101010;
+      --border: #444444;
+      --border-strong: #555555;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--ink);
+      background: var(--bg-alt);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+    a { color: var(--red); text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    /* Header / Footer */
+    .header {
+      padding: 16px 20px;
+      background: var(--bg);
+      border-bottom: 3px solid var(--red);
+    }
+
+    .header-content, .footer-content {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo { color: var(--ink); font-size: 26px; font-weight: 900; }
+    .logo-red { color: var(--red); }
+    .back-link { font-size: 14px; font-weight: 700; }
+    .back-link:hover { text-decoration: underline; }
+
+    .footer { padding: 20px; color: #fff; background: var(--red); font-size: 14px; }
+    .footer a { color: #fff; font-weight: 700; }
+
+    /* Layout */
+    .main {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 20px 70px;
+      flex: 1;
+    }
+
+    .page-title { margin: 0 0 6px; font-size: 30px; }
+    .page-intro { margin: 0 0 24px; color: var(--ink-soft); }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 11px 18px;
+      color: var(--ink-soft);
+      background: none;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .tab:hover { color: var(--red); }
+    .tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+    .panel[hidden] { display: none; }
+
+    /* Statistik-Karten */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      padding: 18px 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--red);
+      border-radius: 8px;
+    }
+
+    .stat-value { font-size: 32px; font-weight: 900; line-height: 1.1; }
+    .stat-label { margin-top: 6px; color: var(--ink-soft); font-size: 13px; }
+
+    /* Boxen */
+    .box {
+      padding: 22px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .box h2 { margin: 0 0 16px; font-size: 18px; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Balkendiagramm */
+    .bar-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 34px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .bar-track {
+      height: 12px;
+      overflow: hidden;
+      background: var(--bg-alt);
+      border-radius: 6px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      min-width: 2px;
+      background: var(--red);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+
+    .bar-count { text-align: right; font-weight: 700; }
+
+    .empty { margin: 0; color: var(--ink-soft); font-size: 14px; }
+
+    /* Kuchendiagramm */
+    .pie-wrap {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .pie-svg {
+      width: 190px;
+      height: 190px;
+      flex-shrink: 0;
+    }
+
+    .pie-slice, .pie-svg circle {
+      stroke: var(--bg);
+      stroke-width: 2;
+    }
+
+    .pie-slice:hover { opacity: 0.85; }
+
+    .pie-legend {
+      flex: 1;
+      min-width: 180px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .pie-legend li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .pie-dot {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+
+    .pie-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pie-value { font-weight: 700; white-space: nowrap; }
+
+    /* Werkzeugleiste */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .toolbar input, .toolbar select {
+      padding: 10px 12px;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .toolbar input[type="search"] { flex: 1; min-width: 180px; }
+    .toolbar .count { margin-left: auto; color: var(--ink-soft); font-size: 13px; }
+
+    /* Tabellen */
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--ink-soft);
+      font-size: 12px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .cell-user { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+
+    .avatar, .thumb {
+      flex-shrink: 0;
+      overflow: hidden;
+      color: #fff;
+      background: var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+
+    .avatar { width: 36px; height: 36px; border-radius: 50%; font-size: 13px; }
+    .thumb { width: 48px; height: 48px; border-radius: 4px; font-size: 10px; text-align: center; background: var(--ink-soft); }
+    .avatar img, .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .title-cell { max-width: 260px; min-width: 180px; font-weight: 700; overflow-wrap: anywhere; }
+    .muted { color: var(--ink-soft); font-size: 12px; font-weight: 400; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      color: #fff;
+      background: var(--ink-soft);
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge.admin, .badge.tausch { background: var(--red); }
+
+    /* Buttons */
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .btn {
+      padding: 7px 13px;
+      color: var(--ink);
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .btn:hover { color: var(--red); border-color: var(--red); }
+
+    .btn.danger { color: #fff; background: var(--red); border-color: var(--red); }
+    .btn.danger:hover { background: var(--red-dark); border-color: var(--red-dark); color: #fff; }
+
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled:hover { color: var(--ink); border-color: var(--border); }
+
+    .table-empty { padding: 36px 20px; color: var(--ink-soft); text-align: center; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(10px);
+      padding: 12px 20px;
+      color: #fff;
+      background: #1a1a1a;
+      border-left: 4px solid var(--red);
+      border-radius: 22px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 100;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Benutzer-Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 90;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 24px;
+      background: var(--bg);
+      border-top: 4px solid var(--red);
+      border-radius: 8px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-head h2 { margin: 0; font-size: 20px; }
+
+    .modal-close {
+      padding: 4px 8px;
+      color: var(--ink-soft);
+      background: none;
+      border: 0;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover { color: var(--red); }
+
+    .form-group { margin-bottom: 15px; }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .form-group input:disabled, .form-group select:disabled {
+      color: var(--ink-soft);
+      background: var(--bg-alt);
+    }
+
+    .form-group input[readonly] { background: var(--bg-alt); color: var(--ink-soft); }
+
+    .input-row { display: flex; gap: 8px; }
+    .input-row input { flex: 1; min-width: 0; }
+
+    .code-field { font-family: "Courier New", monospace; letter-spacing: 1px; }
+
+    .modal-note { margin: 0 0 14px; color: var(--ink-soft); font-size: 12.5px; line-height: 1.45; }
+
+    .modal-status { min-height: 18px; margin: 4px 0 0; color: var(--red); font-size: 13px; }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 800px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .header-content, .footer-content { flex-direction: column; align-items: flex-start; }
+      .main { padding: 26px 12px 50px; }
+      .bar-row { grid-template-columns: 100px 1fr 30px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-content">
+      <a class="logo" href="index.html"><span class="logo-red">dhbw</span>markt</a>
+      <a class="back-link" href="Profil.html">Zurück zum Profil</a>
+    </div>
+  </header>
+
+  <main class="main" id="mainContent" hidden>
+    <h1 class="page-title">Admin-Dashboard</h1>
+    <p class="page-intro">Benutzer und Anzeigen im Überblick verwalten.</p>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" type="button" data-tab="uebersicht" role="tab">Übersicht</button>
+      <button class="tab" type="button" data-tab="benutzer" role="tab">Benutzer</button>
+      <button class="tab" type="button" data-tab="anzeigen" role="tab">Anzeigen</button>
+    </nav>
+
+    <!-- ÜBERSICHT -->
+    <section class="panel" id="panel-uebersicht">
+      <div class="stats" id="stats"></div>
+
+      <div class="two-col">
+        <div class="box">
+          <h2>Anzeigen nach Kategorie</h2>
+          <div id="chartKategorien"></div>
+        </div>
+
+        <div class="box">
+          <h2>Anzeigen nach Wohnheim</h2>
+          <div id="chartWohnheime"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENUTZER -->
+    <section class="panel" id="panel-benutzer" hidden>
+      <div class="toolbar">
+        <input type="search" id="userSearch" placeholder="Name oder E-Mail suchen …" aria-label="Benutzer suchen">
+        <span class="count" id="userCount"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Benutzer</th>
+              <th>E-Mail</th>
+              <th>Wohnheim</th>
+              <th>Anzeigen</th>
+              <th>Rolle</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="userBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ANZEIGEN -->
+    <section class="panel" id="panel-anzeigen" hidden>
+      <div class="toolbar">
+        <input type="search" id="adSearch" placeholder="Titel oder Verkäufer suchen …" aria-label="Anzeigen suchen">
+        <select id="adCategory" aria-label="Kategorie filtern">
+          <option value="">Alle Kategorien</option>
+        </select>
+        <select id="adType" aria-label="Angebotsart filtern">
+          <option value="">Verkauf &amp; Tausch</option>
+          <option value="verkauf">Nur Verkauf</option>
+          <option value="tausch">Nur Tausch</option>
+        </select>
+        <span class="count" id="adCount"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Anzeige</th>
+              <th>Kategorie</th>
+              <th>Preis</th>
+              <th>Verkäufer</th>
+              <th>Erstellt</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="adBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>&copy; 2026 dhbwmarkt</span>
+      <a href="impressum.html">Impressum</a>
+    </div>
+  </footer>
+
+  <!-- Benutzer-Dialog -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+      <div class="modal-head">
+        <h2 id="userModalTitle">Benutzerdaten</h2>
+        <button class="modal-close" id="userModalClose" type="button" aria-label="Schließen">✕</button>
+      </div>
+
+      <p class="modal-note" id="userModalNote" hidden></p>
+
+      <form id="userForm">
+        <div class="form-group">
+          <label for="uId">Benutzer-ID</label>
+          <input id="uId" type="text" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="uName">Name</label>
+          <input id="uName" type="text" minlength="2" required>
+        </div>
+
+        <div class="form-group">
+          <label for="uEmail">E-Mail-Adresse</label>
+          <input id="uEmail" type="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="uWohnheim">Wohnheim / Standort</label>
+          <select id="uWohnheim"></select>
+        </div>
+
+        <div class="form-group">
+          <label for="uPassword">Passwort</label>
+          <div class="input-row">
+            <input id="uPassword" type="password" minlength="6" autocomplete="off" required>
+            <button class="btn" id="uTogglePw" type="button">Anzeigen</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="uRole">Rolle</label>
+          <select id="uRole">
+            <option value="user">Normaler Benutzer</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="uCode">Wiederherstellungscode</label>
+          <div class="input-row">
+            <input id="uCode" class="code-field" type="text" readonly>
+            <button class="btn" id="uNewCode" type="button">Neu erzeugen</button>
+          </div>
+        </div>
+
+        <p class="modal-status" id="userModalStatus" aria-live="polite"></p>
+
+        <div class="modal-footer">
+          <button class="btn" id="userModalCancel" type="button">Abbrechen</button>
+          <button class="btn danger" id="userModalSave" type="submit">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    // ==================================================
+    // 1. THEME
+    // ==================================================
+
+    function istNacht() {
+      const test = localStorage.getItem("testNacht");
+      if (test === "an") return true;
+      if (test === "aus") return false;
+      const stunde = new Date().getHours();
+      return stunde >= 20 || stunde < 7;
+    }
+
+    function ladeGespeichertesTheme() {
+      const auto = localStorage.getItem("autoTheme") === "on";
+      const dunkel = auto ? istNacht() : localStorage.getItem("theme") === "dark";
+      document.body.classList.toggle("dark-mode", dunkel);
+    }
+
+    ladeGespeichertesTheme();
+
+
+    // ==================================================
+    // 2. DATEN
+    // ==================================================
+
+    const KATEGORIEN = {
+      moebel: "Möbel",
+      elektronik: "Elektronik",
+      buecher: "Bücher & Skripte",
+      kueche: "Küche",
+      fahrrad: "Fahrrad",
+      kleidung: "Kleidung",
+      sonstiges: "Sonstiges"
+    };
+
+    // Entspricht dem fest eingebauten Admin aus der Anmeldeseite
+    const STANDARD_ADMIN = {
+      id: "admin",
+      name: "Admin",
+      email: "admin@dhbw.de",
+      wohnheim: "Kein Wohnheim / außerhalb eines Wohnheims",
+      role: "admin"
+    };
+
+    function leseJson(key, fallback) {
+      try {
+        const wert = JSON.parse(localStorage.getItem(key));
+        return wert === null || wert === undefined ? fallback : wert;
+      } catch (fehler) {
+        console.error(key + " konnte nicht gelesen werden:", fehler);
+        return fallback;
+      }
+    }
+
+    const admin = leseJson("loggedInUser", null);
+
+    function ladeBenutzer() {
+      const registrierte = leseJson("registeredUsers", []);
+      return [STANDARD_ADMIN].concat(registrierte);
+    }
+
+    function ladeAnzeigen() {
+      return leseJson("anzeigen", []);
+    }
+
+    function profilbild(benutzer) {
+      return benutzer.profileImage ||
+        localStorage.getItem("profileImage-" + benutzer.id) || "";
+    }
+
+    function zaehleFavoriten() {
+      let summe = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.indexOf("favoriten-") === 0) {
+          const liste = leseJson(key, []);
+          if (Array.isArray(liste)) summe += liste.length;
+        }
+      }
+      return summe;
+    }
+
+
+    // ==================================================
+    // 3. HILFSFUNKTIONEN
+    // ==================================================
+
+    function escapeHtml(text) {
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function initialen(name) {
+      const teile = String(name || "").trim().split(/\s+/).filter(Boolean);
+      if (!teile.length) return "?";
+      return teile.slice(0, 2).map(function (t) { return t.charAt(0).toUpperCase(); }).join("");
+    }
+
+    function preisText(anzeige) {
+      if (anzeige.tausch) return "Tausch";
+      const preis = Number(anzeige.price);
+      if (!Number.isFinite(preis)) return "Auf Anfrage";
+      if (preis === 0) return "Verschenken";
+      return preis.toFixed(2).replace(".", ",") + " €";
+    }
+
+    function datumText(iso) {
+      if (!iso) return "–";
+      const datum = new Date(iso);
+      if (Number.isNaN(datum.getTime())) return "–";
+      return datum.toLocaleDateString("de-DE", {
+        day: "2-digit", month: "2-digit", year: "numeric"
+      });
+    }
+
+    let toastTimer = null;
+    function zeigeToast(text) {
+      const toast = document.getElementById("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+    }
+
+    function speichere(key, wert) {
+      try {
+        localStorage.setItem(key, JSON.stringify(wert));
+        return true;
+      } catch (fehler) {
+        console.error("Speichern fehlgeschlagen:", fehler);
+        window.alert("Die Änderung konnte nicht gespeichert werden.");
+        return false;
+      }
+    }
+
+
+    // ==================================================
+    // 4. ZUGRIFFSSCHUTZ
+    // ==================================================
+
+    if (!admin) {
+      window.location.href = "anmeldeseite_regestrierung.html";
+    } else if (admin.role !== "admin") {
+      window.alert("Du hast keine Berechtigung für das Admin-Dashboard.");
+      window.location.href = "index.html";
+    } else {
+      document.getElementById("mainContent").hidden = false;
+    }
+
+
+    // ==================================================
+    // 5. ÜBERSICHT
+    // ==================================================
+
+    function renderStats() {
+      const benutzer = ladeBenutzer();
+      const anzeigen = ladeAnzeigen();
+
+      const tausch = anzeigen.filter(function (a) { return a.tausch; }).length;
+      const verkauf = anzeigen.length - tausch;
+
+      const gestern = Date.now() - 24 * 60 * 60 * 1000;
+      const neu = anzeigen.filter(function (a) {
+        const zeit = new Date(a.erstelltAm).getTime();
+        return Number.isFinite(zeit) && zeit >= gestern;
+      }).length;
+
+      const werte = [
+        [benutzer.length, "Benutzer"],
+        [anzeigen.length, "Anzeigen gesamt"],
+        [verkauf, "Zum Verkauf"],
+        [tausch, "Zum Tausch"],
+        [neu, "Neu (letzte 24 h)"],
+        [zaehleFavoriten(), "Favoriten gesamt"]
+      ];
+
+      document.getElementById("stats").innerHTML = werte.map(function (eintrag) {
+        return '<div class="stat"><div class="stat-value">' + eintrag[0] +
+          '</div><div class="stat-label">' + escapeHtml(eintrag[1]) + "</div></div>";
+      }).join("");
+    }
+
+    const KUCHEN_FARBEN = [
+      "#e2001a", "#1a1a1a", "#7a7a7a", "#b40014", "#f2828f",
+      "#4a4a4a", "#ff6b3d", "#c7c7c7", "#8c0010", "#2e6f95"
+    ];
+
+    function kuchenHtml(eintraege) {
+      const daten = eintraege.filter(function (e) { return e[1] > 0; });
+      const summe = daten.reduce(function (s, e) { return s + e[1]; }, 0);
+
+      if (!summe) {
+        return '<p class="empty">Noch keine Daten vorhanden.</p>';
+      }
+
+      const mitte = 100;
+      const radius = 92;
+      let winkel = -Math.PI / 2;
+      let scheiben = "";
+
+      daten.forEach(function (eintrag, i) {
+        const farbe = KUCHEN_FARBEN[i % KUCHEN_FARBEN.length];
+        const anteil = eintrag[1] / summe;
+        const titel = "<title>" + escapeHtml(eintrag[0]) + ": " + eintrag[1] + "</title>";
+
+        if (daten.length === 1) {
+          scheiben += '<circle cx="' + mitte + '" cy="' + mitte + '" r="' + radius +
+            '" fill="' + farbe + '">' + titel + "</circle>";
+          return;
+        }
+
+        const ende = winkel + anteil * 2 * Math.PI;
+        const x1 = mitte + radius * Math.cos(winkel);
+        const y1 = mitte + radius * Math.sin(winkel);
+        const x2 = mitte + radius * Math.cos(ende);
+        const y2 = mitte + radius * Math.sin(ende);
+        const gross = anteil > 0.5 ? 1 : 0;
+
+        scheiben += '<path d="M' + mitte + " " + mitte + " L" + x1.toFixed(2) + " " + y1.toFixed(2) +
+          " A" + radius + " " + radius + " 0 " + gross + " 1 " + x2.toFixed(2) + " " + y2.toFixed(2) +
+          ' Z" fill="' + farbe + '" class="pie-slice">' + titel + "</path>";
+
+        winkel = ende;
+      });
+
+      const legende = daten.map(function (eintrag, i) {
+        const prozent = Math.round((eintrag[1] / summe) * 100);
+        return '<li><span class="pie-dot" style="background:' + KUCHEN_FARBEN[i % KUCHEN_FARBEN.length] + '"></span>' +
+          '<span class="pie-name" title="' + escapeHtml(eintrag[0]) + '">' + escapeHtml(eintrag[0]) + "</span>" +
+          '<span class="pie-value">' + eintrag[1] + " (" + prozent + " %)</span></li>";
+      }).join("");
+
+      return '<div class="pie-wrap">' +
+        '<svg class="pie-svg" viewBox="0 0 200 200" role="img" aria-label="Kuchendiagramm">' + scheiben + "</svg>" +
+        '<ul class="pie-legend">' + legende + "</ul></div>";
+    }
+
+    function renderCharts() {
+      const anzeigen = ladeAnzeigen();
+
+      const proKategorie = {};
+      Object.keys(KATEGORIEN).forEach(function (id) { proKategorie[id] = 0; });
+      anzeigen.forEach(function (a) {
+        const id = KATEGORIEN[a.kategorie] ? a.kategorie : "sonstiges";
+        proKategorie[id] += 1;
+      });
+
+      const kategorieDaten = Object.keys(proKategorie)
+        .map(function (id) { return [KATEGORIEN[id], proKategorie[id]]; })
+        .sort(function (a, b) { return b[1] - a[1]; });
+
+      const proWohnheim = {};
+      anzeigen.forEach(function (a) {
+        const name = String(a.wohnheim || "Keine Angabe").split(" – ")[0];
+        proWohnheim[name] = (proWohnheim[name] || 0) + 1;
+      });
+
+      const wohnheimDaten = Object.keys(proWohnheim)
+        .map(function (name) { return [name, proWohnheim[name]]; })
+        .sort(function (a, b) { return b[1] - a[1]; })
+        .reduce(function (ergebnis, eintrag, i) {
+          if (i < 7) {
+            ergebnis.push(eintrag);
+          } else if (i === 7) {
+            ergebnis.push(["Weitere", eintrag[1]]);
+          } else {
+            ergebnis[7][1] += eintrag[1];
+          }
+          return ergebnis;
+        }, []);
+
+      document.getElementById("chartKategorien").innerHTML = kuchenHtml(kategorieDaten);
+      document.getElementById("chartWohnheime").innerHTML = kuchenHtml(wohnheimDaten);
+    }
+
+
+    // ==================================================
+    // 6. BENUTZER
+    // ==================================================
+
+    const userSearch = document.getElementById("userSearch");
+    const userBody = document.getElementById("userBody");
+    const userCount = document.getElementById("userCount");
+
+    function renderBenutzer() {
+      const suche = userSearch.value.trim().toLowerCase();
+      const anzeigen = ladeAnzeigen();
+
+      const liste = ladeBenutzer().filter(function (b) {
+        return !suche ||
+          String(b.name || "").toLowerCase().includes(suche) ||
+          String(b.email || "").toLowerCase().includes(suche);
+      });
+
+      userCount.textContent = liste.length + (liste.length === 1 ? " Benutzer" : " Benutzer");
+
+      if (!liste.length) {
+        userBody.innerHTML = '<tr><td colspan="6" class="table-empty">Keine Benutzer gefunden.</td></tr>';
+        return;
+      }
+
+      userBody.innerHTML = liste.map(function (b) {
+        const bild = profilbild(b);
+        const avatar = bild
+          ? '<img src="' + escapeHtml(bild) + '" alt="">'
+          : escapeHtml(initialen(b.name || b.email));
+
+        const anzahl = anzeigen.filter(function (a) {
+          return String(a.ownerId) === String(b.id);
+        }).length;
+
+        const istAdmin = b.role === "admin";
+        const istIch = String(b.id) === String(admin.id);
+        const gesperrt = istAdmin || istIch;
+
+        return "<tr>" +
+          '<td><div class="cell-user"><span class="avatar">' + avatar + "</span>" +
+            "<strong>" + escapeHtml(b.name || "–") + "</strong></div></td>" +
+          "<td>" + escapeHtml(b.email) + "</td>" +
+          "<td>" + escapeHtml(String(b.wohnheim || "Keine Angabe").split(" – ")[0]) + "</td>" +
+          "<td>" + anzahl + "</td>" +
+          '<td><span class="badge' + (istAdmin ? " admin" : "") + '">' +
+            (istAdmin ? "Admin" : "Benutzer") + "</span></td>" +
+          '<td><div class="actions"><button class="btn" type="button" data-edit-user="' +
+            escapeHtml(b.id) + '">' + (istAdmin && b.id === "admin" ? "Ansehen" : "Bearbeiten") + "</button>" +
+          '<button class="btn danger" type="button" data-delete-user="' +
+            escapeHtml(b.id) + '"' + (gesperrt ? " disabled" : "") +
+            ' title="' + (gesperrt ? "Admin-Konten können nicht gelöscht werden" : "Benutzer löschen") +
+            '">Löschen</button></div></td>' +
+          "</tr>";
+      }).join("");
+    }
+
+    function loescheBenutzer(id) {
+      const registrierte = leseJson("registeredUsers", []);
+      const ziel = registrierte.find(function (b) { return String(b.id) === String(id); });
+
+      if (!ziel || ziel.role === "admin") return;
+
+      const anzeigen = ladeAnzeigen();
+      const betroffen = anzeigen.filter(function (a) {
+        return String(a.ownerId) === String(id);
+      }).length;
+
+      const frage = 'Benutzer "' + (ziel.name || ziel.email) + '" wirklich löschen?' +
+        (betroffen ? "\n\nAuch seine " + betroffen + " Anzeige(n) werden gelöscht." : "");
+
+      if (!window.confirm(frage)) return;
+
+      const verbleibende = registrierte.filter(function (b) { return String(b.id) !== String(id); });
+      const verbleibendeAnzeigen = anzeigen.filter(function (a) { return String(a.ownerId) !== String(id); });
+
+      if (!speichere("registeredUsers", verbleibende)) return;
+      if (!speichere("anzeigen", verbleibendeAnzeigen)) return;
+
+      localStorage.removeItem("profileImage-" + id);
+      localStorage.removeItem("favoriten-" + id);
+
+      alleNeuZeichnen();
+      zeigeToast("Benutzer gelöscht.");
+    }
+
+    userSearch.addEventListener("input", renderBenutzer);
+
+    userBody.addEventListener("click", function (event) {
+      const bearbeiten = event.target.closest("[data-edit-user]");
+      if (bearbeiten) {
+        oeffneBenutzerModal(bearbeiten.dataset.editUser);
+        return;
+      }
+
+      const button = event.target.closest("[data-delete-user]");
+      if (button && !button.disabled) loescheBenutzer(button.dataset.deleteUser);
+    });
+
+
+    // ---------- Benutzer anzeigen und bearbeiten ----------
+
+    const WOHNHEIME = [
+      "Kein Wohnheim / außerhalb eines Wohnheims",
+      "Am Verbindungskanal – Hafenstraße 35–45, 68159 Mannheim",
+      "Augartenstraße – Augartenstraße 112–114, 68165 Mannheim",
+      "B 6 – B 6, 14–15, 68159 Mannheim",
+      "B 7 – B 7, 14–15, 68159 Mannheim",
+      "Carl-Zuckmayer-Straße – Carl-Zuckmayer-Straße 13–17, 68169 Mannheim",
+      "Eastsite – Seckenheimer Landstraße 4a, 68163 Mannheim",
+      "G 7 – G 7, 26–28, 68159 Mannheim",
+      "Hans-Sachs-Ring / Steubenstraße – Hans-Sachs-Ring 1–5 und Steubenstraße 80, 68199 Mannheim",
+      "L 8 – L 8, 13–14, 68161 Mannheim",
+      "Neckarauer Straße – Neckarauer Straße 169–175, 68199 Mannheim",
+      "Parkring – Parkring 21, 68159 Mannheim",
+      "Studentensiedlung Ludwig Frank – Ulmenweg 55, 68167 Mannheim",
+      "Speyerer Straße – Speyerer Straße 39–57, 68199 Mannheim",
+      "N 6 / Hermann-Heimerich-Haus – N 6, 8, 68161 Mannheim"
+    ];
+
+    const userModal = document.getElementById("userModal");
+    const userForm = document.getElementById("userForm");
+    const uId = document.getElementById("uId");
+    const uName = document.getElementById("uName");
+    const uEmail = document.getElementById("uEmail");
+    const uWohnheim = document.getElementById("uWohnheim");
+    const uPassword = document.getElementById("uPassword");
+    const uTogglePw = document.getElementById("uTogglePw");
+    const uRole = document.getElementById("uRole");
+    const uCode = document.getElementById("uCode");
+    const uNewCode = document.getElementById("uNewCode");
+    const userModalNote = document.getElementById("userModalNote");
+    const userModalStatus = document.getElementById("userModalStatus");
+    const userModalSave = document.getElementById("userModalSave");
+
+    let bearbeiteterBenutzerId = null;
+
+    function erzeugeWiederherstellungscode() {
+      const zeichen = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const zufall = new Uint32Array(12);
+      crypto.getRandomValues(zufall);
+
+      let code = "";
+      for (let i = 0; i < 12; i++) {
+        if (i > 0 && i % 4 === 0) code += "-";
+        code += zeichen[zufall[i] % zeichen.length];
+      }
+      return code;
+    }
+
+    function fuelleWohnheime(aktuell) {
+      uWohnheim.innerHTML = "";
+      const liste = WOHNHEIME.slice();
+
+      if (aktuell && liste.indexOf(aktuell) === -1) liste.push(aktuell);
+
+      liste.forEach(function (name) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        uWohnheim.appendChild(option);
+      });
+
+      uWohnheim.value = aktuell || WOHNHEIME[0];
+    }
+
+    function oeffneBenutzerModal(id) {
+      const benutzer = ladeBenutzer().find(function (b) {
+        return String(b.id) === String(id);
+      });
+      if (!benutzer) return;
+
+      const festerAdmin = benutzer.id === "admin";
+      const bin_ich = String(benutzer.id) === String(admin.id);
+
+      bearbeiteterBenutzerId = benutzer.id;
+
+      uId.value = benutzer.id;
+      uName.value = benutzer.name || "";
+      uEmail.value = benutzer.email || "";
+      fuelleWohnheime(benutzer.wohnheim);
+      uRole.value = benutzer.role === "admin" ? "admin" : "user";
+      uCode.value = benutzer.recoveryCode || "";
+
+      uPassword.type = "password";
+      uTogglePw.textContent = "Anzeigen";
+      uPassword.value = festerAdmin ? "" : (benutzer.password || "");
+      uPassword.placeholder = festerAdmin ? "Fest im Code hinterlegt" : "";
+      uPassword.required = !festerAdmin;
+
+      userModalStatus.textContent = "";
+      userModalNote.hidden = !(festerAdmin || bin_ich);
+      userModalNote.textContent = festerAdmin
+        ? "Dieses Admin-Konto ist fest in der Anmeldeseite hinterlegt und kann hier nur angesehen werden."
+        : "Das ist dein eigenes Konto. Die Rolle kann deshalb nicht geändert werden.";
+
+      [uName, uEmail, uWohnheim, uPassword, uRole, uNewCode, uTogglePw].forEach(function (feld) {
+        feld.disabled = festerAdmin;
+      });
+
+      uRole.disabled = festerAdmin || bin_ich;
+      uTogglePw.disabled = festerAdmin;
+      userModalSave.hidden = festerAdmin;
+
+      document.getElementById("userModalTitle").textContent =
+        festerAdmin ? "Benutzerdaten ansehen" : "Benutzer bearbeiten";
+
+      userModal.classList.add("open");
+    }
+
+    function schliesseBenutzerModal() {
+      userModal.classList.remove("open");
+      uPassword.value = "";
+      bearbeiteterBenutzerId = null;
+    }
+
+    uTogglePw.addEventListener("click", function () {
+      const versteckt = uPassword.type === "password";
+      uPassword.type = versteckt ? "text" : "password";
+      uTogglePw.textContent = versteckt ? "Ausblenden" : "Anzeigen";
+    });
+
+    uNewCode.addEventListener("click", function () {
+      uCode.value = erzeugeWiederherstellungscode();
+    });
+
+    document.getElementById("userModalClose").addEventListener("click", schliesseBenutzerModal);
+    document.getElementById("userModalCancel").addEventListener("click", schliesseBenutzerModal);
+
+    userModal.addEventListener("click", function (event) {
+      if (event.target === userModal) schliesseBenutzerModal();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && userModal.classList.contains("open")) {
+        schliesseBenutzerModal();
+      }
+    });
+
+    userForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (bearbeiteterBenutzerId === null || bearbeiteterBenutzerId === "admin") return;
+
+      const name = uName.value.trim();
+      const email = uEmail.value.trim().toLowerCase();
+      const passwort = uPassword.value;
+
+      if (name.length < 2) {
+        userModalStatus.textContent = "Bitte gib einen Namen ein.";
+        return;
+      }
+
+      if (passwort.length < 6) {
+        userModalStatus.textContent = "Das Passwort muss mindestens 6 Zeichen lang sein.";
+        return;
+      }
+
+      const registrierte = leseJson("registeredUsers", []);
+      const index = registrierte.findIndex(function (b) {
+        return String(b.id) === String(bearbeiteterBenutzerId);
+      });
+
+      if (index === -1) {
+        userModalStatus.textContent = "Benutzer wurde nicht gefunden.";
+        return;
+      }
+
+      const emailVergeben =
+        email === STANDARD_ADMIN.email ||
+        registrierte.some(function (b) {
+          return String(b.id) !== String(bearbeiteterBenutzerId) &&
+            String(b.email).toLowerCase() === email;
+        });
+
+      if (emailVergeben) {
+        userModalStatus.textContent = "Diese E-Mail-Adresse ist bereits vergeben.";
+        return;
+      }
+
+      const aktualisiert = {
+        ...registrierte[index],
+        name: name,
+        email: email,
+        wohnheim: uWohnheim.value,
+        password: passwort,
+        role: uRole.value,
+        recoveryCode: uCode.value
+      };
+
+      registrierte[index] = aktualisiert;
+      if (!speichere("registeredUsers", registrierte)) return;
+
+      // Name und E-Mail in den Anzeigen des Benutzers mitziehen
+      const anzeigen = ladeAnzeigen();
+      anzeigen.forEach(function (a) {
+        if (String(a.ownerId) === String(aktualisiert.id)) {
+          a.ownerName = name;
+          a.ownerEmail = email;
+        }
+      });
+      speichere("anzeigen", anzeigen);
+
+      // Falls der Benutzer gerade angemeldet ist, Sitzung angleichen
+      if (String(admin.id) === String(aktualisiert.id)) {
+        const sitzung = {
+          ...admin,
+          name: name,
+          email: email,
+          wohnheim: aktualisiert.wohnheim
+        };
+        speichere("loggedInUser", sitzung);
+      }
+
+      schliesseBenutzerModal();
+      alleNeuZeichnen();
+      zeigeToast("Benutzerdaten gespeichert.");
+    });
+
+
+    // ==================================================
+    // 7. ANZEIGEN
+    // ==================================================
+
+    const adSearch = document.getElementById("adSearch");
+    const adCategory = document.getElementById("adCategory");
+    const adType = document.getElementById("adType");
+    const adBody = document.getElementById("adBody");
+    const adCount = document.getElementById("adCount");
+
+    Object.keys(KATEGORIEN).forEach(function (id) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = KATEGORIEN[id];
+      adCategory.appendChild(option);
+    });
+
+    function renderAnzeigen() {
+      const suche = adSearch.value.trim().toLowerCase();
+      const kategorie = adCategory.value;
+      const art = adType.value;
+
+      const liste = ladeAnzeigen().filter(function (a) {
+        const passtSuche = !suche ||
+          String(a.title || "").toLowerCase().includes(suche) ||
+          String(a.ownerName || "").toLowerCase().includes(suche) ||
+          String(a.ownerEmail || "").toLowerCase().includes(suche);
+
+        const passtKategorie = !kategorie || a.kategorie === kategorie;
+        const passtArt = !art || (art === "tausch" ? a.tausch : !a.tausch);
+
+        return passtSuche && passtKategorie && passtArt;
+      });
+
+      adCount.textContent = liste.length + (liste.length === 1 ? " Anzeige" : " Anzeigen");
+
+      if (!liste.length) {
+        adBody.innerHTML = '<tr><td colspan="6" class="table-empty">Keine Anzeigen gefunden.</td></tr>';
+        return;
+      }
+
+      adBody.innerHTML = liste.map(function (a) {
+        const bild = a.bild || (Array.isArray(a.bilder) && a.bilder[0]) || "";
+        const thumb = bild
+          ? '<img src="' + escapeHtml(bild) + '" alt="">'
+          : "Kein Bild";
+
+        const id = escapeHtml(a.id);
+
+        return "<tr>" +
+          '<td><div class="cell-user"><span class="thumb">' + thumb + "</span>" +
+            '<span class="title-cell">' + escapeHtml(a.title) +
+            '<br><span class="muted">' + escapeHtml(a.zustand || "") + "</span></span></div></td>" +
+          "<td>" + escapeHtml(KATEGORIEN[a.kategorie] || "Sonstiges") + "</td>" +
+          "<td>" + (a.tausch ? '<span class="badge tausch">Tausch</span>' : escapeHtml(preisText(a))) + "</td>" +
+          "<td>" + escapeHtml(a.ownerName || a.ownerEmail || "Unbekannt") + "</td>" +
+          "<td>" + escapeHtml(datumText(a.erstelltAm)) + "</td>" +
+          '<td><div class="actions">' +
+            '<a class="btn" href="anzeige.html?id=' + encodeURIComponent(a.id) + '">Ansehen</a>' +
+            '<a class="btn" href="verkauf.html?edit=' + encodeURIComponent(a.id) + '">Bearbeiten</a>' +
+            '<button class="btn danger" type="button" data-delete-ad="' + id + '">Löschen</button>' +
+          "</div></td></tr>";
+      }).join("");
+    }
+
+    function loescheAnzeige(id) {
+      const anzeigen = ladeAnzeigen();
+      const ziel = anzeigen.find(function (a) { return String(a.id) === String(id); });
+      if (!ziel) return;
+
+      if (!window.confirm('Anzeige "' + ziel.title + '" wirklich löschen?')) return;
+
+      const verbleibende = anzeigen.filter(function (a) { return String(a.id) !== String(id); });
+      if (!speichere("anzeigen", verbleibende)) return;
+
+      alleNeuZeichnen();
+      zeigeToast("Anzeige gelöscht.");
+    }
+
+    adSearch.addEventListener("input", renderAnzeigen);
+    adCategory.addEventListener("change", renderAnzeigen);
+    adType.addEventListener("change", renderAnzeigen);
+
+    adBody.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-delete-ad]");
+      if (button) loescheAnzeige(button.dataset.deleteAd);
+    });
+
+
+    // ==================================================
+    // 8. TABS UND START
+    // ==================================================
+
+    function zeigeTab(name) {
+      document.querySelectorAll(".tab").forEach(function (tab) {
+        tab.classList.toggle("active", tab.dataset.tab === name);
+        tab.setAttribute("aria-selected", String(tab.dataset.tab === name));
+      });
+
+      document.querySelectorAll(".panel").forEach(function (panel) {
+        panel.hidden = panel.id !== "panel-" + name;
+      });
+    }
+
+    document.querySelector(".tabs").addEventListener("click", function (event) {
+      const tab = event.target.closest(".tab");
+      if (tab) zeigeTab(tab.dataset.tab);
+    });
+
+    function alleNeuZeichnen() {
+      renderStats();
+      renderCharts();
+      renderBenutzer();
+      renderAnzeigen();
+    }
+
+    if (admin && admin.role === "admin") {
+      alleNeuZeichnen();
+    }
+  </script>
+</body>
+</html>
