@@ -109,6 +109,8 @@
       updated_at: new Date().toISOString()
     };
 
+    listing.bilder = row.bilder;
+    listing.bild = row.bilder[0] || "";
     let result;
     if (existingId) {
       const { data, error } = await db.from("anzeigen")
