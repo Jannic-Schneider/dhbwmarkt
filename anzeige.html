@@ -715,13 +715,14 @@ body.dark-mode .error-message {
     </div>
   </footer>
 
- <script>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-data.js"></script>
+<script>
   "use strict";
 
   // Anzeigen aus dem gemeinsamen localStorage laden
-  const anzeigen = JSON.parse(
-    localStorage.getItem("anzeigen")
-  ) || [];
+  let anzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
 
   const registrierteBenutzer = JSON.parse(
   localStorage.getItem("registeredUsers")
@@ -881,24 +882,13 @@ function loescheAnzeige(anzeige) {
     return;
   }
 
-  const aktuelleAnzeigen = JSON.parse(
-    localStorage.getItem("anzeigen")
-  ) || [];
-
-  const verbleibendeAnzeigen =
-    aktuelleAnzeigen.filter(function (eintrag) {
-      return String(eintrag.id) !==
-        String(anzeige.id);
-    });
-
-  localStorage.setItem(
-    "anzeigen",
-    JSON.stringify(verbleibendeAnzeigen)
-  );
-
-  window.alert("Die Anzeige wurde gelöscht.");
-
-  window.location.href = "index.html";
+  window.DHBWMarktData.deleteListing(anzeige.id).then(function () {
+    window.alert("Die Anzeige wurde gelöscht.");
+    window.location.href = "index.html";
+  }).catch(function (error) {
+    console.error(error);
+    window.alert("Die Anzeige konnte nicht gelöscht werden: " + (error.message || error));
+  });
 }
 
 function findeVerkaeufer(anzeige) {
@@ -1041,6 +1031,11 @@ function wechsleFavorit(id) {
   }
 
   localStorage.setItem(favoritenKey(), JSON.stringify(liste));
+  const istFavorit = liste.includes(idText);
+  window.DHBWMarktData.setFavorite(idText, istFavorit).catch(function (error) {
+    console.error(error);
+    window.alert("Favorit konnte nicht gespeichert werden: " + (error.message || error));
+  });
 }
 
 // ===== Bewertungen =====
@@ -1232,7 +1227,17 @@ function renderBewertungen(anzeige) {
       }
 
       speichereBewertungen(alle);
-      renderBewertungen(anzeige);
+      window.DHBWMarktData.saveReview({
+        fuerId: verkaeuferId,
+        anzeigeId: anzeige.id,
+        sterne: gewaehlt,
+        kommentar: kommentarFeld.value.trim()
+      }).then(function () {
+        renderBewertungen(anzeige);
+      }).catch(function (error) {
+        console.error(error);
+        window.alert("Bewertung konnte nicht gespeichert werden: " + (error.message || error));
+      });
     });
   }
 
@@ -1638,12 +1643,17 @@ if (deleteButton) {
     });
 
 
-  // Anzeige oder Fehlermeldung darstellen
-  if (ausgewaehlteAnzeige) {
-    zeigeAnzeige(ausgewaehlteAnzeige);
-  } else {
-    zeigeFehler();
-  }
+  // Gemeinsame Daten laden, bevor die Anzeige dargestellt wird.
+  (async function ladeGemeinsameAnzeige() {
+    try {
+      await window.DHBWMarktData.bootstrapCache();
+      anzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
+    } catch (error) {
+      console.error("Supabase-Daten konnten nicht geladen werden:", error);
+    }
+    const aktuelleAnzeige = anzeigen.find(function (a) { return String(a.id) === String(anzeigenId); });
+    if (aktuelleAnzeige) zeigeAnzeige(aktuelleAnzeige); else zeigeFehler();
+  })();
 
 function istNacht() {
   const test = localStorage.getItem("testNacht");

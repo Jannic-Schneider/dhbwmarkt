@@ -612,6 +612,10 @@ body.dark-mode #upload-close-btn:hover {
 <!-- Canvas-Confetti Bibliothek -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-data.js"></script>
 <script>
 "use strict";
 
@@ -968,7 +972,7 @@ function konfetti() {
   }, 250);
 }
 
-form.addEventListener("submit", function (event) {
+form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   if (!loggedInUser) return;
@@ -1051,17 +1055,21 @@ form.addEventListener("submit", function (event) {
     gespeicherteAnzeigeId = neueAnzeige.id;
   }
 
+  submitBtn.disabled = true;
   try {
+    const savedId = await window.DHBWMarktData.saveListing(anzeigeDaten, zuBearbeitendeAnzeige ? zuBearbeitendeAnzeige.id : null);
+    const gespeicherte = { ...anzeigeDaten, id: savedId, ownerId: loggedInUser.id,
+      ownerName: loggedInUser.name || loggedInUser.email, ownerEmail: loggedInUser.email,
+      erstelltAm: zuBearbeitendeAnzeige ? zuBearbeitendeAnzeige.erstelltAm : new Date().toISOString() };
+    const index = anzeigen.findIndex(function (a) { return String(a.id) === String(savedId); });
+    if (index >= 0) anzeigen[index] = gespeicherte; else anzeigen.unshift(gespeicherte);
     localStorage.setItem("anzeigen", JSON.stringify(anzeigen));
   } catch (fehler) {
-    console.error("Anzeige konnte nicht gespeichert werden:", fehler);
-    window.alert(
-      "Die Anzeige konnte nicht gespeichert werden. Möglicherweise ist das Bild zu groß."
-    );
+    console.error("Anzeige konnte nicht in Supabase gespeichert werden:", fehler);
+    window.alert("Die Anzeige konnte nicht gespeichert werden: " + (fehler.message || fehler));
+    submitBtn.disabled = false;
     return;
   }
-
-   submitBtn.disabled = true; // verhindert doppeltes Absenden
 
   if (!zuBearbeitendeAnzeige) {
     konfetti();

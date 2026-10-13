@@ -575,7 +575,11 @@
     </div>
   </footer>
 
-  <script>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-data.js"></script>
+<script>
     "use strict";
 
     const profileAvatar = document.getElementById("profileAvatar");
@@ -850,78 +854,30 @@ if (dashboardRow) {
     editProfileButton.addEventListener("click", oeffneBearbeitung);
     cancelEditButton.addEventListener("click", schliesseBearbeitung);
 
-    profileForm.addEventListener("submit", function (event) {
+    profileForm.addEventListener("submit", async function (event) {
       event.preventDefault();
-
-      const benutzer = ladeJson("loggedInUser");
-      if (!benutzer) return;
-
+      const user = await window.DHBWMarktData.currentUser().catch(() => null);
+      if (!user) { window.location.href = "anmeldeseite_regestrierung.html"; return; }
       const neuerName = editName.value.trim();
       const neueEmail = editEmail.value.trim().toLowerCase();
       const neuesWohnheim = editWohnheim.value;
-
-      if (neuerName.length < 2) {
-        zeigeStatus("Bitte gib einen Namen ein.", "red");
-        return;
-      }
-
-      const registrierte = ladeJson("registeredUsers") || [];
-
-      // E-Mail darf nicht schon bei jemand anderem existieren
-      const emailVergeben =
-        neueEmail === "admin@dhbw.de" ||
-        registrierte.some(function (eintrag) {
-          return (
-            String(eintrag.id) !== String(benutzer.id) &&
-            String(eintrag.email).toLowerCase() === neueEmail
-          );
-        });
-
-      if (emailVergeben) {
-        zeigeStatus("Diese E-Mail-Adresse ist bereits vergeben.", "red");
-        return;
-      }
-
+      if (neuerName.length < 2) { zeigeStatus("Bitte gib einen Namen ein.", "red"); return; }
       try {
-        // 1. In der Nutzerliste aktualisieren (Passwort und Code bleiben erhalten)
-        const index = registrierte.findIndex(function (eintrag) {
-          return String(eintrag.id) === String(benutzer.id);
-        });
-
-        if (index !== -1) {
-          registrierte[index] = {
-            ...registrierte[index],
-            name: neuerName,
-            email: neueEmail,
-            wohnheim: neuesWohnheim
-          };
-          localStorage.setItem("registeredUsers", JSON.stringify(registrierte));
-        }
-
-        // 2. Angemeldeten Nutzer aktualisieren
-        benutzer.name = neuerName;
-        benutzer.email = neueEmail;
-        benutzer.wohnheim = neuesWohnheim;
-        localStorage.setItem("loggedInUser", JSON.stringify(benutzer));
-
-        // 3. Eigene Anzeigen: Name und E-Mail des Verkäufers anpassen
-        const anzeigen = ladeJson("anzeigen") || [];
-        anzeigen.forEach(function (anzeige) {
-          if (String(anzeige.ownerId) === String(benutzer.id)) {
-            anzeige.ownerName = neuerName;
-            anzeige.ownerEmail = neueEmail;
-          }
-        });
-        localStorage.setItem("anzeigen", JSON.stringify(anzeigen));
-      } catch (fehler) {
-        console.error("Profil konnte nicht gespeichert werden:", fehler);
-        zeigeStatus("Die Änderungen konnten nicht gespeichert werden.", "red");
-        return;
+        await window.DHBWMarktData.updateProfile({ name: neuerName, email: neueEmail, wohnheim: neuesWohnheim });
+        await window.DHBWMarktData.bootstrapCache();
+        zeigeProfil();
+        schliesseBearbeitung();
+        zeigeStatus("Profil gespeichert. Eine E-Mail-Änderung kann eine Bestätigung erfordern.", "green");
+      } catch (error) {
+        console.error(error);
+        zeigeStatus("Profil konnte nicht gespeichert werden: " + (error.message || error), "red");
       }
-
-      zeigeProfil();
-      schliesseBearbeitung();
     });
+
+    function zeigePasswortStatus(text) {
+      passwordStatus.textContent = text;
+      passwordStatus.style.color = "red";
+    }
 
         function zeigePasswortStatus(text) {
       passwordStatus.textContent = text;
@@ -946,62 +902,22 @@ if (dashboardRow) {
 
     cancelPasswordButton.addEventListener("click", schliessePasswortFormular);
 
-    passwordForm.addEventListener("submit", function (event) {
+    passwordForm.addEventListener("submit", async function (event) {
       event.preventDefault();
-
-      const benutzer = ladeJson("loggedInUser");
-      if (!benutzer) return;
-
-      const altesPasswort = oldPassword.value;
       const neuesPasswort = newPassword.value;
       const bestaetigung = newPasswordConfirm.value;
-
-      const registrierte = ladeJson("registeredUsers") || [];
-
-      const index = registrierte.findIndex(function (eintrag) {
-        return String(eintrag.id) === String(benutzer.id);
-      });
-
-      if (index === -1) {
-        zeigePasswortStatus("Für dieses Konto kann das Passwort nicht geändert werden.");
-        return;
-      }
-
-      if (registrierte[index].password !== altesPasswort) {
-        zeigePasswortStatus("Das aktuelle Passwort ist falsch.");
-        return;
-      }
-
-      if (neuesPasswort.length < 6) {
-        zeigePasswortStatus("Das neue Passwort muss mindestens 6 Zeichen lang sein.");
-        return;
-      }
-
-      if (neuesPasswort !== bestaetigung) {
-        zeigePasswortStatus("Die neuen Passwörter stimmen nicht überein.");
-        return;
-      }
-
-      if (neuesPasswort === altesPasswort) {
-        zeigePasswortStatus("Das neue Passwort muss sich vom alten unterscheiden.");
-        return;
-      }
-
+      if (neuesPasswort.length < 8) { zeigePasswortStatus("Das neue Passwort muss mindestens 8 Zeichen lang sein."); return; }
+      if (neuesPasswort !== bestaetigung) { zeigePasswortStatus("Die neuen Passwörter stimmen nicht überein."); return; }
       try {
-        registrierte[index] = {
-          ...registrierte[index],
-          password: neuesPasswort
-        };
-
-        localStorage.setItem("registeredUsers", JSON.stringify(registrierte));
-      } catch (fehler) {
-        console.error("Passwort konnte nicht gespeichert werden:", fehler);
-        zeigePasswortStatus("Das Passwort konnte nicht gespeichert werden.");
-        return;
+        await window.DHBWMarktData.changePassword(neuesPasswort);
+        passwordStatus.style.color = "green";
+        zeigePasswortStatus("Passwort erfolgreich geändert.");
+        passwordForm.reset();
+        schliessePasswortFormular();
+      } catch (error) {
+        console.error(error);
+        zeigePasswortStatus("Passwort konnte nicht geändert werden: " + (error.message || error), "red");
       }
-
-      schliessePasswortFormular();
-      window.alert("Dein Passwort wurde geändert.");
     });
 
     // ===== Wiederherstellungscode =====
@@ -1019,6 +935,7 @@ if (dashboardRow) {
       return code;
     }
 
+    if (recoveryRow) recoveryRow.hidden = true;
     recoveryButton.addEventListener("click", function () {
       const benutzer = ladeJson("loggedInUser");
       if (!benutzer) return;
@@ -1114,14 +1031,8 @@ if (dashboardRow) {
           return;
         }
 
-        benutzer.profileImage = profilbild;
-        localStorage.setItem("loggedInUser", JSON.stringify(benutzer));
-
-        if (benutzer.id) {
-          localStorage.setItem("profileImage-" + benutzer.id, profilbild);
-        }
-
-        aktualisiereRegistriertenBenutzer(benutzer);
+        await window.DHBWMarktData.updateProfile({ avatar_url: profilbild });
+        await window.DHBWMarktData.bootstrapCache();
         zeigeProfilbild(profilbild, benutzer.name || benutzer.email);
         window.alert("Das Profilbild wurde gespeichert.");
       } catch (fehler) {
@@ -1132,16 +1043,21 @@ if (dashboardRow) {
       }
     });
 
-    logoutButton.addEventListener("click", function () {
+    logoutButton.addEventListener("click", async function () {
       const wirklichAbmelden = window.confirm("Möchtest du dich wirklich abmelden?");
       if (!wirklichAbmelden) return;
-
+      try { await window.DHBWMarktData.client().auth.signOut(); }
+      catch (error) { console.error("Abmelden fehlgeschlagen:", error); }
       localStorage.removeItem("loggedInUser");
       window.location.href = "anmeldeseite_regestrierung.html";
     });
 
     ladeTheme();
-    zeigeProfil();
+    (async function ladeProfilAusSupabase() {
+      try { await window.DHBWMarktData.bootstrapCache(); }
+      catch (error) { console.error("Profil konnte nicht geladen werden:", error); }
+      zeigeProfil();
+    })();
   </script>
 </body>
 </html>
