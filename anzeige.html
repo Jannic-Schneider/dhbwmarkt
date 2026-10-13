@@ -1028,6 +1028,11 @@ function wechsleFavorit(id) {
   }
 
   localStorage.setItem(favoritenKey(), JSON.stringify(liste));
+  const istFavorit = liste.includes(idText);
+  window.DHBWMarktData.setFavorite(idText, istFavorit).catch(function (error) {
+    console.error(error);
+    window.alert("Favorit konnte nicht gespeichert werden: " + (error.message || error));
+  });
 }
 
 // ===== Bewertungen =====
@@ -1219,7 +1224,17 @@ function renderBewertungen(anzeige) {
       }
 
       speichereBewertungen(alle);
-      renderBewertungen(anzeige);
+      window.DHBWMarktData.saveReview({
+        fuerId: verkaeuferId,
+        anzeigeId: anzeige.id,
+        sterne: gewaehlt,
+        kommentar: kommentarFeld.value.trim()
+      }).then(function () {
+        renderBewertungen(anzeige);
+      }).catch(function (error) {
+        console.error(error);
+        window.alert("Bewertung konnte nicht gespeichert werden: " + (error.message || error));
+      });
     });
   }
 
