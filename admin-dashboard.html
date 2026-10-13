@@ -102,6 +102,9 @@
     .tab:hover { color: var(--red); }
     .tab.active { color: var(--red); border-bottom-color: var(--red); }
 
+    /* Benutzerverwaltung vollständig aus der Oberfläche ausblenden – ohne Aufblitzen beim Laden. */
+    .tab[data-tab="benutzer"] { display: none !important; }
+
     .panel[hidden] { display: none; }
 
     /* Statistik-Karten */
