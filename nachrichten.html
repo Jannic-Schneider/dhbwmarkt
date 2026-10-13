@@ -266,7 +266,11 @@
     </div>
   </footer>
 
-  <script>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-data.js"></script>
+<script>
     "use strict";
 
     // ===== Theme =====
@@ -535,30 +539,19 @@
       renderListe();
     });
 
-    chatForm.addEventListener("submit", function (event) {
+    chatForm.addEventListener("submit", async function (event) {
       event.preventDefault();
       if (!aktiveKonversation) return;
-
       const text = chatInput.value.trim();
       if (!text) return;
-
-      const liste = ladeNachrichten();
-      liste.push({
-        id: "msg-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
-        konversationId: aktiveKonversation.id,
-        anzeigeId: aktiveKonversation.anzeigeId,
-        anzeigeTitel: aktiveKonversation.anzeigeTitel,
-        vonId: ich.id,
-        vonName: ich.name || ich.email,
-        anId: aktiveKonversation.partnerId,
-        anName: aktiveKonversation.partnerName,
-        text: text,
-        zeit: new Date().toISOString(),
-        gelesen: false
-      });
-
-      if (!speichereNachrichten(liste)) return;
-
+      try {
+        await window.DHBWMarktData.sendMessage(aktiveKonversation.anzeigeId, aktiveKonversation.partnerId, text);
+        await window.DHBWMarktData.bootstrapCache();
+      } catch (error) {
+        console.error(error);
+        window.alert("Die Nachricht konnte nicht gesendet werden: " + (error.message || error));
+        return;
+      }
       entwurf = null;
       chatInput.value = "";
       renderChat();
@@ -616,7 +609,11 @@
       renderListe();
     }
 
-    if (ich) starte();
+    (async function ladeGemeinsameNachrichten() {
+      try { await window.DHBWMarktData.bootstrapCache(); }
+      catch (error) { console.error("Nachrichten konnten nicht geladen werden:", error); }
+      if (ich) starte();
+    })();
   </script>
 </body>
 </html>
