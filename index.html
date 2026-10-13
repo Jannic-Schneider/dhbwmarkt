@@ -2502,9 +2502,18 @@ function ladeGespeichertesTheme() {
 
     ladeGespeichertesTheme();
     renderKategorien();
+
+    // Sofort vorhandene lokale Daten anzeigen; Supabase im Hintergrund aktualisieren.
+    renderAnzeigen();
+    ladeProfilbildImHeader();
+    aktualisiereNachrichtenBadge();
+
     (async function starteGemeinsameDaten() {
-      try { await window.DHBWMarktData.bootstrapCache(); }
-      catch (error) { console.error("Supabase-Daten konnten nicht geladen werden:", error); }
+      try {
+        await window.DHBWMarktData.bootstrapCache();
+      } catch (error) {
+        console.error("Supabase-Daten konnten nicht geladen werden:", error);
+      }
       ladeProfilbildImHeader();
       renderAnzeigen();
       aktualisiereNachrichtenBadge();
