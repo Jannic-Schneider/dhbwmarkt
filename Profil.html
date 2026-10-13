@@ -350,18 +350,8 @@
 
     .setting-row[hidden] {
       display: none;
-    }
-
-    .recovery-code-output {
-      margin-top: 10px !important;
-      color: var(--red) !important;
-      font-family: "Courier New", monospace;
-      font-size: 18px !important;
-      font-weight: 700;
-      user-select: all;
-    }
-
-    .form-status {
+    } 
+.form-status {
       min-height: 20px;
       margin: 12px 0 0;
       font-size: 13px;
@@ -527,17 +517,7 @@
           </div>
 
           <p class="form-status" id="passwordStatus" aria-live="polite"></p>
-        </form>
-
-        <div class="setting-row" id="recoveryRow">
-          <div class="setting-description">
-            <strong>Wiederherstellungscode</strong>
-            <p>Erzeuge einen Code, mit dem du dein Passwort zurücksetzen kannst. Ein bisheriger Code wird ungültig.</p>
-            <p class="recovery-code-output" id="recoveryCodeOutput"></p>
-          </div>
-          <button class="theme-button" id="recoveryButton" type="button">Neuen Code erzeugen</button>
-        </div>
-
+        </form> 
         <div class="setting-row" id="dashboardRow"hidden>
   <div class="setting-description">
     <strong>Admin-Dashboard</strong>
@@ -605,11 +585,6 @@
     const newPasswordConfirm = document.getElementById("newPasswordConfirm");
     const cancelPasswordButton = document.getElementById("cancelPasswordButton");
     const passwordStatus = document.getElementById("passwordStatus");
-    const recoveryRow = document.getElementById("recoveryRow");
-    const recoveryButton = document.getElementById("recoveryButton");
-    const recoveryCodeOutput = document.getElementById("recoveryCodeOutput");
-
-
     const WOHNHEIME = [
       "Kein Wohnheim / außerhalb eines Wohnheims",
       "Am Verbindungskanal – Hafenstraße 35–45, 68159 Mannheim",
@@ -809,8 +784,6 @@ if (dashboardRow) {
       // Admin darf seine Daten nicht bearbeiten
       editProfileButton.hidden = benutzer.role === "admin";
       passwordRow.hidden = benutzer.role === "admin";
-      recoveryRow.hidden = benutzer.role === "admin";
-
       zeigeProfilbild(profilbild, name);
 
       const profilDaten = {
@@ -920,51 +893,7 @@ if (dashboardRow) {
       }
     });
 
-    // ===== Wiederherstellungscode =====
 
-    function erzeugeWiederherstellungscode() {
-      const zeichen = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // ohne 0/O/1/I
-      const zufall = new Uint32Array(12);
-      crypto.getRandomValues(zufall);
-
-      let code = "";
-      for (let i = 0; i < 12; i++) {
-        if (i > 0 && i % 4 === 0) code += "-";
-        code += zeichen[zufall[i] % zeichen.length];
-      }
-      return code;
-    }
-
-    if (recoveryRow) recoveryRow.hidden = true;
-    recoveryButton.addEventListener("click", function () {
-      const benutzer = ladeJson("loggedInUser");
-      if (!benutzer) return;
-
-      const registrierte = ladeJson("registeredUsers") || [];
-      const index = registrierte.findIndex(function (eintrag) {
-        return String(eintrag.id) === String(benutzer.id);
-      });
-
-      if (index === -1) {
-        window.alert("Für dieses Konto kann kein Code erzeugt werden.");
-        return;
-      }
-
-      if (!window.confirm("Ein neuer Code macht den bisherigen ungültig. Fortfahren?")) return;
-
-      const code = erzeugeWiederherstellungscode();
-
-      try {
-        registrierte[index] = { ...registrierte[index], recoveryCode: code };
-        localStorage.setItem("registeredUsers", JSON.stringify(registrierte));
-      } catch (fehler) {
-        console.error("Code konnte nicht gespeichert werden:", fehler);
-        window.alert("Der Code konnte nicht gespeichert werden.");
-        return;
-      }
-
-      recoveryCodeOutput.textContent = code + "  (bitte speichern!)";
-    });
 
     themeButton.addEventListener("click", function () {
       document.body.classList.toggle("dark-mode");
