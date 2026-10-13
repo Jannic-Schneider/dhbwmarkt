@@ -1636,20 +1636,22 @@ if (deleteButton) {
     urlParameter.get("id");
 
 
-  // Anzeige erst nach dem Laden der gemeinsamen Daten suchen.
-  // Falls der Cache direkt nach dem Veröffentlichen noch veraltet ist,
-  // die konkrete Anzeige einmal direkt aus Supabase nachladen.
+  // Die Detailseite lädt zuerst gezielt die Anzeige aus Supabase.
+  // bootstrapCache lädt zusätzlich Favoriten/Nachrichten/Bewertungen und kann
+  // fehlschlagen, obwohl die Anzeige selbst erreichbar ist.
   (async function ladeGemeinsameAnzeige() {
     let aktuelleAnzeige = null;
+    let cacheAnzeigen = [];
 
     try {
-      await window.DHBWMarktData.bootstrapCache();
-      anzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
-      aktuelleAnzeige = anzeigen.find(function (a) {
-        return String(a.id) === String(anzeigenId);
-      });
+      cacheAnzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
+    } catch (_) {
+      cacheAnzeigen = [];
+    }
 
-      if (!aktuelleAnzeige && anzeigenId) {
+    // Erst direkt per UUID laden – unabhängig davon, ob der übrige Cache-Aufbau klappt.
+    if (anzeigenId) {
+      try {
         const direktGeladen = await window.DHBWMarktData.getListings({
           id: anzeigenId,
           includeArchived: true
@@ -1657,24 +1659,34 @@ if (deleteButton) {
         aktuelleAnzeige = direktGeladen.find(function (a) {
           return String(a.id) === String(anzeigenId);
         }) || null;
-
-        if (aktuelleAnzeige) {
-          anzeigen = [aktuelleAnzeige].concat(anzeigen.filter(function (a) {
-            return String(a.id) !== String(aktuelleAnzeige.id);
-          }));
-          localStorage.setItem("anzeigen", JSON.stringify(anzeigen));
-        }
+      } catch (error) {
+        console.error("Anzeige konnte nicht direkt aus Supabase geladen werden:", error);
       }
-    } catch (error) {
-      console.error("Supabase-Daten konnten nicht geladen werden:", error);
-      // Ein bereits vorhandener Cache-Eintrag darf trotzdem angezeigt werden.
-      anzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
-      aktuelleAnzeige = anzeigen.find(function (a) {
+    }
+
+    // Falls direkter Abruf nicht geklappt hat, Cache aktualisieren und erneut prüfen.
+    if (!aktuelleAnzeige) {
+      try {
+        await window.DHBWMarktData.bootstrapCache();
+      } catch (error) {
+        console.error("Der übrige Supabase-Cache konnte nicht geladen werden:", error);
+      }
+
+      try {
+        cacheAnzeigen = JSON.parse(localStorage.getItem("anzeigen")) || [];
+      } catch (_) {
+        cacheAnzeigen = [];
+      }
+      aktuelleAnzeige = cacheAnzeigen.find(function (a) {
         return String(a.id) === String(anzeigenId);
       }) || null;
     }
 
     if (aktuelleAnzeige) {
+      const rest = cacheAnzeigen.filter(function (a) {
+        return String(a.id) !== String(aktuelleAnzeige.id);
+      });
+      localStorage.setItem("anzeigen", JSON.stringify([aktuelleAnzeige].concat(rest)));
       zeigeAnzeige(aktuelleAnzeige);
     } else {
       zeigeFehler();
