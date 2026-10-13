@@ -222,14 +222,41 @@
   async function saveReview(review) {
     const user = await currentUser();
     if (!user) throw new Error("Bitte melde dich zuerst an.");
-    const { error } = await client().from("bewertungen").upsert({
+
+    const db = client();
+    const values = {
       reviewer_id: user.id,
       reviewed_user_id: review.fuerId,
       anzeige_id: review.anzeigeId,
       sterne: Number(review.sterne),
       kommentar: String(review.kommentar || "").trim()
-    }, { onConflict: "reviewer_id,anzeige_id" });
-    if (error) throw error;
+    };
+
+    // Nicht upsert/onConflict verwenden: Die bestehende Datenbank hat
+    // offenbar keinen passenden UNIQUE-Constraint auf reviewer_id + anzeige_id.
+    // Stattdessen vorhandene Bewertung suchen und aktualisieren, sonst neu anlegen.
+    const { data: existing, error: lookupError } = await db
+      .from("bewertungen")
+      .select("id")
+      .eq("reviewer_id", user.id)
+      .eq("anzeige_id", review.anzeigeId)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+
+    if (existing) {
+      const { error } = await db.from("bewertungen")
+        .update({
+          reviewed_user_id: values.reviewed_user_id,
+          sterne: values.sterne,
+          kommentar: values.kommentar
+        })
+        .eq("id", existing.id)
+        .eq("reviewer_id", user.id);
+      if (error) throw error;
+    } else {
+      const { error } = await db.from("bewertungen").insert(values);
+      if (error) throw error;
+    }
   }
 
 
