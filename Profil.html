@@ -1043,10 +1043,11 @@ if (dashboardRow) {
       }
     });
 
-    logoutButton.addEventListener("click", function () {
+    logoutButton.addEventListener("click", async function () {
       const wirklichAbmelden = window.confirm("Möchtest du dich wirklich abmelden?");
       if (!wirklichAbmelden) return;
-
+      try { await window.DHBWMarktData.client().auth.signOut(); }
+      catch (error) { console.error("Abmelden fehlgeschlagen:", error); }
       localStorage.removeItem("loggedInUser");
       window.location.href = "anmeldeseite_regestrierung.html";
     });
