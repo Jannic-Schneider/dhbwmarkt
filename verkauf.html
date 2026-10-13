@@ -660,10 +660,12 @@ function leseJson(key, fallback) {
 }
 
 const loggedInUser = leseJson("loggedInUser", null);
-const authClient = window.supabase.createClient(
+// Dieselbe Supabase-Instanz wie in supabase-data.js verwenden.
+// Zwei Clients auf derselben Seite können den Auth-Zustand uneinheitlich sehen.
+const authClient = window.dhbwSupabase || (window.dhbwSupabase = window.supabase.createClient(
   window.DHBWMARKT_SUPABASE_URL,
   window.DHBWMARKT_SUPABASE_PUBLISHABLE_KEY
-);
+));
 
 if (!loggedInUser) {
   window.alert("Du musst angemeldet sein, um eine Anzeige zu erstellen.");
