@@ -43,7 +43,7 @@
       bild: images[0] || "",
       erstelltAm: row.created_at,
       bearbeitetAm: row.updated_at,
-      status: row.status || "active"
+      status: row.status || "aktiv"
     };
   }
 
@@ -55,7 +55,7 @@
       .select("id,owner_id,title,price,tausch,kategorie,wohnheim,zustand,beschreibung,bilder,status,created_at,updated_at")
       .order("created_at", { ascending: false });
 
-    if (!opts.includeArchived) query = query.eq("status", "active");
+    if (!opts.includeArchived) query = query.eq("status", "aktiv");
     if (opts.ownerId) query = query.eq("owner_id", opts.ownerId);
     if (opts.id) query = query.eq("id", opts.id);
 
@@ -105,7 +105,7 @@
       zustand: listing.zustand || "",
       beschreibung: listing.beschreibung || "",
       bilder: await Promise.all((Array.isArray(listing.bilder) ? listing.bilder : []).map((image, index) => uploadImageIfNeeded(image, "anzeige-" + index))),
-      status: listing.status || "active",
+      status: listing.status || "aktiv",
       updated_at: new Date().toISOString()
     };
 
