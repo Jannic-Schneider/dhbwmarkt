@@ -463,7 +463,20 @@
         }
       });
 
-      if (geaendert) speichereNachrichten(liste);
+      if (geaendert) {
+        speichereNachrichten(liste);
+        const eingehende = liste.filter(function (n) {
+          return n.konversationId === konvId && String(n.anId) === String(ich.id);
+        });
+        const senderIds = [...new Set(eingehende.map(function (n) { return String(n.vonId); }))];
+        senderIds.forEach(function (senderId) {
+          const nachricht = eingehende.find(function (n) { return String(n.vonId) === senderId; });
+          if (nachricht) {
+            window.DHBWMarktData.markMessagesRead(nachricht.anzeigeId, senderId)
+              .catch(function (error) { console.error("Lesestatus konnte nicht gespeichert werden:", error); });
+          }
+        });
+      }
     }
 
     // ===== Chat zeichnen =====
