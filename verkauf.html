@@ -660,6 +660,10 @@ function leseJson(key, fallback) {
 }
 
 const loggedInUser = leseJson("loggedInUser", null);
+const authClient = window.supabase.createClient(
+  window.DHBWMARKT_SUPABASE_URL,
+  window.DHBWMARKT_SUPABASE_PUBLISHABLE_KEY
+);
 
 if (!loggedInUser) {
   window.alert("Du musst angemeldet sein, um eine Anzeige zu erstellen.");
@@ -974,6 +978,15 @@ function konfetti() {
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
+
+  // Ein Eintrag in localStorage allein ist keine echte Supabase-Anmeldung.
+  // Vor dem Speichern immer die aktive Auth-Session prüfen.
+  const { data: authData, error: authError } = await authClient.auth.getSession();
+  if (authError || !authData?.session?.user) {
+    window.alert("Du bist nicht bei DHBWMarkt angemeldet. Bitte melde dich zuerst an und versuche es danach erneut.");
+    window.location.href = "anmeldeseite_regestrierung.html";
+    return;
+  }
 
   if (!loggedInUser) return;
 
