@@ -1050,7 +1050,11 @@ if (dashboardRow) {
     });
 
     ladeTheme();
-    zeigeProfil();
+    (async function ladeProfilAusSupabase() {
+      try { await window.DHBWMarktData.bootstrapCache(); }
+      catch (error) { console.error("Profil konnte nicht geladen werden:", error); }
+      zeigeProfil();
+    })();
   </script>
 </body>
 </html>
