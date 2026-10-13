@@ -579,9 +579,56 @@
       }
     });
 
+    // Nachrichten automatisch aktualisieren, ohne dass die Seite neu geladen werden muss.
+    let aktualisierungLaeuft = false;
+    let letzterNachrichtenStand = "";
+
+    async function aktualisiereNachrichten() {
+      if (aktualisierungLaeuft || document.visibilityState === "hidden") return;
+      aktualisierungLaeuft = true;
+      try {
+        await window.DHBWMarktData.bootstrapCache();
+        const aktuelleNachrichten = localStorage.getItem("nachrichten") || "[]";
+        if (aktuelleNachrichten !== letzterNachrichtenStand) {
+          letzterNachrichtenStand = aktuelleNachrichten;
+          renderChat();
+          renderListe();
+        }
+      } catch (error) {
+        console.warn("Automatische Nachrichtenaktualisierung fehlgeschlagen:", error);
+      } finally {
+        aktualisierungLaeuft = false;
+      }
+    }
+
+    // Sofortige Aktualisierung über Supabase Realtime, sofern aktiviert.
+    try {
+      const db = window.DHBWMarktData.client();
+      const nachrichtenKanal = db.channel("dhbwmarkt-nachrichten-" + ich.id);
+      nachrichtenKanal
+        .on("postgres_changes", {
+          event: "*", schema: "public", table: "nachrichten",
+          filter: "recipient_id=eq." + ich.id
+        }, aktualisiereNachrichten)
+        .on("postgres_changes", {
+          event: "*", schema: "public", table: "nachrichten",
+          filter: "sender_id=eq." + ich.id
+        }, aktualisiereNachrichten)
+        .subscribe();
+    } catch (error) {
+      console.warn("Supabase Realtime nicht verfügbar; es wird regelmäßig aktualisiert.", error);
+    }
+
+    // Fallback: auch ohne Realtime alle 5 Sekunden prüfen.
+    window.setInterval(aktualisiereNachrichten, 5000);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") aktualisiereNachrichten();
+    });
+
     // Änderungen aus anderen Tabs live übernehmen
     window.addEventListener("storage", function (event) {
       if (event.key !== "nachrichten") return;
+      letzterNachrichtenStand = event.newValue || "";
       renderChat();
       renderListe();
     });
