@@ -1294,11 +1294,10 @@ const verkaeufername =
   anzeige.ownerName || "Unbekannter Verkäufer";
 
   const verkaeuferBild =
-  anzeige.ownerId
-    ? localStorage.getItem(
-        "profileImage-" + anzeige.ownerId
-      ) || ""
-    : "";
+  anzeige.ownerAvatarUrl ||
+  (anzeige.ownerId
+    ? localStorage.getItem("profileImage-" + anzeige.ownerId) || ""
+    : "");
 ``
 
   const verkaeuferEmail =
@@ -1432,13 +1431,17 @@ const verkaeufername =
       <section class="rating-box" id="ratingBox"></section>
 
 <div class="action-buttons">
-  <button
-    class="contact-button"
-    id="contactButton"
-    type="button"
-  >
-    Verkäufer kontaktieren
-  </button>
+  ${
+    loggedInUser && String(anzeige.ownerId) === String(loggedInUser.id)
+      ? ""
+      : `<button
+          class="contact-button"
+          id="contactButton"
+          type="button"
+        >
+          Verkäufer kontaktieren
+        </button>`
+  }
 
   ${
     darfAnzeigeVerwalten(anzeige)
@@ -1550,9 +1553,8 @@ if (bilder.length > 0) {
 
     const contactButton =
       document.getElementById("contactButton");
-// Kontakt Button öffnet Outlook und fügt die Email Adresse automatisch ein.
-     // Kontakt-Button öffnet den Chat mit dem Verkäufer
-    contactButton.addEventListener("click", function () {
+    // Eigene Anzeigen haben keinen Kontakt-Button.
+    if (contactButton) contactButton.addEventListener("click", function () {
       if (!loggedInUser) {
         window.location.href = "anmeldeseite_regestrierung.html";
         return;
