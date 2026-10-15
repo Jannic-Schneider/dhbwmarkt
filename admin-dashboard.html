@@ -786,8 +786,13 @@
     // 5. ÜBERSICHT
     // ==================================================
 
+    // Wird beim Laden aus Supabase gesetzt, damit nicht nur lokale Browserdaten gezählt werden.
+    let echteBenutzerAnzahl = null;
+
     function renderStats() {
-      const benutzer = ladeBenutzer();
+      const benutzerAnzahl = Number.isInteger(echteBenutzerAnzahl)
+        ? echteBenutzerAnzahl
+        : ladeBenutzer().length;
       const anzeigen = ladeAnzeigen();
 
       const tausch = anzeigen.filter(function (a) { return a.tausch; }).length;
@@ -800,7 +805,7 @@
       }).length;
 
       const werte = [
-        [benutzer.length, "Benutzer"],
+        [benutzerAnzahl, "Benutzer"],
         [anzeigen.length, "Anzeigen gesamt"],
         [verkauf, "Zum Verkauf"],
         [tausch, "Zum Tausch"],
@@ -1389,6 +1394,17 @@
             window.location.href = "index.html";
             return;
           }
+          // Die Anzahl der Konten aus der gemeinsamen Supabase-Datenbank lesen.
+          // registeredUsers in localStorage enthält nur lokale/zuletzt synchronisierte Daten.
+          const { count, error: countError } = await window.DHBWMarktData.client()
+            .from("profiles")
+            .select("id", { count: "exact", head: true });
+          if (countError) {
+            console.error("Benutzeranzahl konnte nicht aus Supabase geladen werden:", countError);
+          } else if (Number.isInteger(count)) {
+            echteBenutzerAnzahl = count;
+          }
+
           // Die Benutzerverwaltung ist deaktiviert und wird bereits beim ersten Rendern per CSS ausgeblendet.
           alleNeuZeichnen();
         } catch (error) {
