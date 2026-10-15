@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Datenschutzhinweise für dhbwmarkt.">
+  <title>Datenschutz | dhbwmarkt</title>
+  <style>
+    :root {
+      --red: #e2001a; --red-dark: #b40014; --ink: #1a1a1a;
+      --ink-soft: #5f5f5f; --bg: #ffffff; --bg-alt: #f5f5f5;
+      --border: #e1e1e1;
+    }
+    body.dark-mode {
+      --ink: #f5f5f5; --ink-soft: #b8b8b8; --bg: #282828;
+      --bg-alt: #101010; --border: #383838;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column;
+      background: var(--bg-alt); color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif; line-height: 1.65;
+    }
+    a { color: var(--red); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    :focus-visible { outline: 2px solid var(--red); outline-offset: 4px; }
+    .header { padding: 14px 20px; background: var(--bg); border-bottom: 3px solid var(--red); }
+    .header-content, .footer-content {
+      max-width: 1180px; margin: 0 auto; display: flex; align-items: center;
+      justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    }
+    .logo { color: var(--ink); font-size: 26px; font-weight: 900; letter-spacing: -.5px; line-height: 1.2; }
+    .logo:hover { text-decoration: none; }
+    .logo-red { color: var(--red); }
+    .back-link { font-size: 14px; font-weight: 700; }
+    .main { width: 100%; max-width: 940px; margin: 0 auto; padding: 36px 20px 56px; flex: 1; }
+    .privacy-card {
+      padding: 36px 40px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; box-shadow: 0 5px 22px rgba(0,0,0,.06); overflow-wrap: anywhere;
+    }
+    h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.2; }
+    h2 { margin: 0 0 12px; font-size: 19px; line-height: 1.4; }
+    p { margin: 0 0 12px; }
+    ul { margin: 8px 0 0; padding-left: 24px; }
+    li { margin: 5px 0; }
+    .intro { margin: 0 0 24px; color: var(--ink-soft); }
+    .privacy-section { padding: 24px 0; border-top: 1px solid var(--border); }
+    .privacy-section:last-child { padding-bottom: 0; }
+    .note { color: var(--ink-soft); font-size: 14px; }
+    .footer { padding: 20px; background: var(--red); color: #fff; font-size: 14px; }
+    .footer a { color: #fff; font-weight: 700; }
+    .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+    @media (max-width: 600px) {
+      .header-content { gap: 14px; }
+      .main { padding: 24px 12px 36px; }
+      .privacy-card { padding: 26px 20px; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <a class="logo" href="index.html" aria-label="dhbwmarkt – Hauptseite"><span class="logo-red">dhbw</span><span>markt</span></a>
+      <nav aria-label="Seitennavigation"><a class="back-link" href="index.html">Zurück zur Hauptseite</a></nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <article class="privacy-card">
+      <h1>Datenschutzerklärung</h1>
+      <p class="intro">Informationen darüber, welche personenbezogenen Daten dhbwmarkt verarbeitet und welche Rechte du hast. Stand: 15. Oktober 2026.</p>
+
+      <section class="privacy-section">
+        <h2>1. Verantwortlicher</h2>
+        <p>Verantwortlich für die Datenverarbeitung im Sinne der Datenschutz-Grundverordnung (DSGVO) ist der im <a href="impressum.html">Impressum</a> genannte Anbieter.</p>
+        <p>Kontakt: <a href="mailto:dhbw.markt@gmail.com">dhbw.markt@gmail.com</a></p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>2. Welche Daten wir verarbeiten</h2>
+        <p>Je nachdem, wie du dhbwmarkt nutzt, können insbesondere folgende Daten verarbeitet werden:</p>
+        <ul>
+          <li><strong>Konto und Anmeldung:</strong> E-Mail-Adresse, Benutzer-ID, Anmeldedaten und Authentifizierungsinformationen.</li>
+          <li><strong>Profil:</strong> Anzeigename, ausgewählter Wohnheim-/Standort und freiwillig hochgeladenes Profilbild.</li>
+          <li><strong>Marktplatz:</strong> Anzeigentitel, Beschreibung, Kategorie, Preis, Zustand, Bilder und Zeitpunkte der Erstellung oder Änderung.</li>
+          <li><strong>Kommunikation und Interaktionen:</strong> Nachrichten zwischen Nutzern, Favoriten und abgegebene Bewertungen.</li>
+          <li><strong>Technische Daten:</strong> Informationen, die beim Aufruf der Website technisch anfallen können, etwa IP-Adresse, Zeitpunkt des Zugriffs, Browserinformationen und Server-Protokolle.</li>
+          <li><strong>Lokaler Speicher:</strong> Die Website verwendet den Speicher deines Browsers (localStorage), zum Beispiel für Anzeige-/Profil-Caches und Einstellungen wie das Farbschema.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section">
+        <h2>3. Zwecke und Rechtsgrundlagen</h2>
+        <p>Wir verarbeiten Daten, damit Konten bereitgestellt und verwaltet werden können, Anzeigen veröffentlicht werden, Nutzer miteinander Nachrichten austauschen, Favoriten und Bewertungen funktionieren und die Sicherheit sowie der technische Betrieb der Website gewährleistet werden.</p>
+        <p>Rechtsgrundlage ist – soweit die Verarbeitung für die Bereitstellung der angeforderten Funktionen erforderlich ist – Art. 6 Abs. 1 lit. b DSGVO. Soweit Daten zur sicheren und stabilen Bereitstellung sowie zur Fehleranalyse verarbeitet werden, kommt Art. 6 Abs. 1 lit. f DSGVO aufgrund unseres berechtigten Interesses am sicheren Betrieb in Betracht. Wenn eine Verarbeitung auf einer Einwilligung beruht, ist Art. 6 Abs. 1 lit. a DSGVO die Rechtsgrundlage; eine Einwilligung kann jederzeit mit Wirkung für die Zukunft widerrufen werden.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>4. Hosting und technische Dienstleister</h2>
+        <p>Die Website wird über <a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener noreferrer">Netlify</a> bereitgestellt. Für Benutzerkonten, Anmeldung, Datenbankfunktionen und gespeicherte Inhalte verwendet dhbwmarkt <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer">Supabase</a>. Dabei werden die für den Betrieb notwendigen Daten an diese Dienstleister übermittelt und dort verarbeitet.</p>
+        <p>Beim Laden externer Bibliotheken können Verbindungen zu deren Anbietern entstehen, beispielsweise zum CDN jsDelivr, über das eine JavaScript-Bibliothek geladen wird. Externe Links, etwa zu Google Maps, werden erst aufgerufen, wenn du sie anklickst.</p>
+        <p class="note">Bitte beachte auch die Datenschutzhinweise der jeweiligen Dienstleister. Die konkreten Vertrags-, Speicherort- und Konfigurationseinstellungen des Projekts müssen vom Betreiber geprüft und aktuell gehalten werden.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>5. Veröffentlichung von Inhalten und Nachrichten</h2>
+        <p>Anzeigen und die damit verbundenen Angaben, die du einstellst, werden auf dem Marktplatz für andere Besucher sichtbar gemacht. Profilangaben können im Zusammenhang mit deinen Anzeigen angezeigt werden. Nachrichten sind für die an der jeweiligen Unterhaltung beteiligten Nutzer bestimmt. Bitte veröffentliche keine sensiblen personenbezogenen Daten und übermittle sie auch nicht unnötig in Nachrichten.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>6. Speicherdauer und Löschung</h2>
+        <p>Personenbezogene Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Pflichten dies verlangen. Kontodaten und von dir eingestellte Inhalte können während der Nutzung des Kontos gespeichert bleiben. Für Auskunfts- oder Löschanfragen wende dich bitte an die oben genannte Kontaktadresse. Die konkrete Löschung in Datenbank, Sicherungen und technischen Protokollen richtet sich nach der eingesetzten Infrastruktur und deren Konfiguration.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>7. Deine Rechte</h2>
+        <p>Nach Maßgabe der gesetzlichen Voraussetzungen hast du das Recht auf Auskunft über deine Daten (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch gegen bestimmte Verarbeitungen (Art. 21 DSGVO). Eine erteilte Einwilligung kannst du jederzeit für die Zukunft widerrufen.</p>
+        <p>Du hast außerdem das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Für Anfragen kannst du die oben genannte E-Mail-Adresse nutzen.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>8. Sicherheit</h2>
+        <p>Wir setzen angemessene technische und organisatorische Maßnahmen ein, um Daten vor Verlust, Missbrauch und unberechtigtem Zugriff zu schützen. Eine Datenübertragung über das Internet kann jedoch nicht vollständig gegen alle Risiken abgesichert werden.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h2>9. Änderungen dieser Datenschutzerklärung</h2>
+        <p>Diese Datenschutzerklärung kann angepasst werden, wenn sich Funktionen, Datenverarbeitungen oder rechtliche Anforderungen ändern. Es gilt die jeweils auf dieser Seite veröffentlichte Fassung.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>&copy; 2026 dhbwmarkt</span>
+      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html" aria-current="page">Datenschutz</a></div>
+    </div>
+  </footer>
+  <script>
+    "use strict";
+    function istNacht() {
+      const test = localStorage.getItem("testNacht");
+      if (test === "an") return true;
+      if (test === "aus") return false;
+      const stunde = new Date().getHours();
+      return stunde >= 20 || stunde < 7;
+    }
+    const auto = localStorage.getItem("autoTheme") === "on";
+    document.body.classList.toggle("dark-mode", auto ? istNacht() : localStorage.getItem("theme") === "dark");
+  </script>
+</body>
+</html>
