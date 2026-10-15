@@ -458,6 +458,12 @@ body.dark-mode #upload-close-btn:hover {
   background: var(--red);
   border-color: var(--red);
 }
+
+    .footer { padding: 20px; color: #fff; background: var(--red, #e2001a); font-size: 14px; }
+    .footer-content { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+    .footer a { color: #fff; font-weight: 700; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1108,5 +1114,13 @@ vorschauAktualisieren();
 fensterOeffnen();
 
 </script>
+
+<footer class="footer">
+  <div class="footer-content">
+    <span>&copy; 2026 dhbwmarkt</span>
+    <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
+  </div>
+</footer>
+
 </body>
 </html>
