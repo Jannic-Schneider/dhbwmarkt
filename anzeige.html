@@ -1054,23 +1054,44 @@ function ladeFavoriten() {
 }
 
 function wechsleFavorit(id) {
+  const key = favoritenKey();
+  if (!key) {
+    window.location.href = "anmeldeseite_regestrierung.html";
+    return false;
+  }
+
   const idText = String(id);
   let liste = ladeFavoriten();
 
   if (liste.includes(idText)) {
     liste = liste.filter(function (eintrag) {
-      return eintrag !== idText;
+      return String(eintrag) !== idText;
     });
   } else {
     liste.push(idText);
   }
 
-  localStorage.setItem(favoritenKey(), JSON.stringify(liste));
   const istFavorit = liste.includes(idText);
+  // Sofort lokal aktualisieren, damit das Herz direkt reagiert.
+  localStorage.setItem(key, JSON.stringify(liste));
+
+  // Supabase im Hintergrund synchronisieren; bei Fehler Cache/UI zurücksetzen.
   window.DHBWMarktData.setFavorite(idText, istFavorit).catch(function (error) {
-    console.error(error);
+    console.error("Favorit konnte nicht in Supabase gespeichert werden:", error);
     window.alert("Favorit konnte nicht gespeichert werden: " + (error.message || error));
+    window.DHBWMarktData.getFavorites().then(function (favoriten) {
+      localStorage.setItem(key, JSON.stringify(favoriten.map(String)));
+      document.querySelectorAll(".detail-fav").forEach(function (button) {
+        const aktiv = favoriten.map(String).includes(idText);
+        button.classList.toggle("active", aktiv);
+        button.setAttribute("aria-pressed", String(aktiv));
+      });
+    }).catch(function (syncError) {
+      console.error("Favoriten konnten nicht erneut geladen werden:", syncError);
+    });
   });
+
+  return istFavorit;
 }
 
 // ===== Bewertungen =====
@@ -1674,14 +1695,26 @@ if (deleteButton) {
       );
     }
 
-    favButton.addEventListener("click", function () {
+    favButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
       if (!loggedInUser) {
         window.location.href = "anmeldeseite_regestrierung.html";
         return;
       }
 
-      wechsleFavorit(anzeige.id);
-      aktualisiereFavButton();
+      const istFavorit = wechsleFavorit(anzeige.id);
+      if (typeof istFavorit === "boolean") {
+        favButton.classList.toggle("active", istFavorit);
+        favButton.setAttribute("aria-pressed", String(istFavorit));
+        favButton.setAttribute(
+          "aria-label",
+          istFavorit ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"
+        );
+      } else {
+        aktualisiereFavButton();
+      }
     });
 
     document.getElementById("detailImage").appendChild(favButton);
