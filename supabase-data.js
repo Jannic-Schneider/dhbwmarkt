@@ -264,6 +264,31 @@
   }
 
 
+  async function deleteReview(reviewId) {
+    const user = await currentUser();
+    if (!user) throw new Error("Bitte melde dich erneut an.");
+    if (!reviewId) throw new Error("Die Bewertung hat keine gültige ID.");
+
+    // Löschen direkt in Supabase, damit die Bewertung nicht beim nächsten
+    // Laden aus der Datenbank wieder im lokalen Cache erscheint.
+    const { data, error } = await client()
+      .from("bewertungen")
+      .delete()
+      .eq("id", reviewId)
+      .eq("reviewer_id", user.id)
+      .select("id");
+
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      throw new Error("Die Bewertung konnte nicht gelöscht werden. Du kannst nur eigene Bewertungen löschen.");
+    }
+
+    const cached = JSON.parse(localStorage.getItem("bewertungen") || "[]");
+    localStorage.setItem("bewertungen", JSON.stringify(
+      (Array.isArray(cached) ? cached : []).filter((review) => String(review.id) !== String(reviewId))
+    ));
+  }
+
   async function bootstrapCache() {
     const db = client();
 
@@ -374,7 +399,7 @@
   window.DHBWMarktData = {
     client, currentUser, getListings, saveListing, deleteListing,
     getFavorites, setFavorite, getMessages, sendMessage,
-    markMessagesRead, getReviews, saveReview, mapListing,
+    markMessagesRead, getReviews, saveReview, deleteReview, mapListing,
     bootstrapCache, updateProfile, changePassword, deleteOwnAccount
   };
 })();
