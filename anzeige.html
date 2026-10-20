@@ -1705,6 +1705,10 @@ if (deleteButton) {
       }
 
       const istFavorit = wechsleFavorit(anzeige.id);
+      window.DHBWMarktData.setFavorite(anzeige.id, istFavorit).catch(function (error) {
+        console.error("Favorit konnte nicht gespeichert werden:", error);
+        window.alert("Der Favorit konnte nicht gespeichert werden: " + (error.message || error));
+      });
       if (typeof istFavorit === "boolean") {
         favButton.classList.toggle("active", istFavorit);
         favButton.setAttribute("aria-pressed", String(istFavorit));
