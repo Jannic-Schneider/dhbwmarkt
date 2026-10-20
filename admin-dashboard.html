@@ -452,7 +452,13 @@
       .main { padding: 26px 12px 50px; }
       .bar-row { grid-template-columns: 100px 1fr 30px; }
     }
-  </style>
+  
+    /* Einheitliche Footer-Anordnung auf allen Seiten */
+    .footer-content { max-width: 1100px; }
+    .footer-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .footer-links a, .footer-links .footer-current { color: #fff; font-weight: 700; text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; }
+</style>
 </head>
 
 <body>
@@ -550,8 +556,7 @@
   <footer class="footer">
     <div class="footer-content">
       <span>&copy; 2026 dhbwmarkt</span>
-      <a href="impressum.html">Impressum</a>
-      <a href="datenschutz.html">Datenschutz</a>
+      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
     </div>
   </footer>
 
