@@ -373,7 +373,8 @@
     // SELECT-Abfrage auf profiles liefert wegen RLS oft nur das eigene Profil.
     const profileIds = [...new Set([
       String(user.id),
-      ...messages.flatMap((message) => [String(message.vonId), String(message.anId)])
+      ...messages.flatMap((message) => [String(message.vonId), String(message.anId)]),
+      ...reviews.map((review) => String(review.vonId))
     ].filter((id) => id && id !== "null" && id !== "undefined"))];
     let profileRows = [];
     try {
@@ -431,10 +432,19 @@
     });
     localStorage.setItem("nachrichten", JSON.stringify(mappedMessages));
 
-    localStorage.setItem("bewertungen", JSON.stringify(reviews.map((r) => ({
-      id: r.id, verkaeuferId: r.fuerId, bewerterId: r.vonId,
-      sterne: r.sterne, kommentar: r.kommentar, erstelltAm: r.erstelltAm
-    }))));
+    localStorage.setItem("bewertungen", JSON.stringify(reviews.map((r) => {
+      const reviewer = profileById.get(String(r.vonId)) || {};
+      return {
+        id: r.id,
+        verkaeuferId: r.fuerId,
+        bewerterId: r.vonId,
+        bewerterName: reviewer.display_name ||
+          (String(r.vonId) === String(user.id) ? loggedInUser.name : "Unbekannt"),
+        sterne: r.sterne,
+        kommentar: r.kommentar,
+        erstelltAm: r.erstelltAm
+      };
+    })));
     return loggedInUser;
   }
 
