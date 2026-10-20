@@ -264,22 +264,30 @@
   }
 
 
-  async function deleteReview(reviewId) {
+  async function deleteReview(reviewId, isAdmin) {
     const user = await currentUser();
     if (!user) throw new Error("Bitte melde dich erneut an.");
     if (!reviewId) throw new Error("Die Bewertung hat keine gültige ID.");
 
-    // Löschen direkt in Supabase, damit die Bewertung nicht beim nächsten
-    // Laden aus der Datenbank wieder im lokalen Cache erscheint.
-    const { data, error } = await client()
-      .from("bewertungen")
-      .delete()
-      .eq("id", reviewId)
-      .select("id");
-
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      throw new Error("Die Bewertung wurde nicht gelöscht. Prüfe, ob du die nötigen Berechtigungen hast.");
+    const db = client();
+    if (isAdmin) {
+      // Die RPC prüft die Admin-Rolle serverseitig in profiles.
+      const { data, error } = await db.rpc("admin_delete_review", {
+        p_review_id: String(reviewId)
+      });
+      if (error) throw error;
+      if (data !== true) throw new Error("Die Bewertung wurde nicht gefunden oder bereits gelöscht.");
+    } else {
+      // Normale Nutzer dürfen nur ihre eigene Bewertung löschen.
+      const { data, error } = await db.from("bewertungen")
+        .delete()
+        .eq("id", reviewId)
+        .eq("reviewer_id", user.id)
+        .select("id");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("Du kannst nur deine eigenen Bewertungen löschen.");
+      }
     }
 
     const cached = JSON.parse(localStorage.getItem("bewertungen") || "[]");
