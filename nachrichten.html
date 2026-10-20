@@ -562,13 +562,47 @@
       deleteChatBtn.textContent = "Wird gelöscht …";
       try {
         const dataApi = window.DHBWMarktData;
-        if (!dataApi || typeof dataApi.deleteConversation !== "function") {
-          throw new Error("Die Chat-Funktion wurde nicht korrekt geladen. Bitte lade die Seite mit Strg+F5 neu.");
+        if (dataApi && typeof dataApi.deleteConversation === "function") {
+          await dataApi.deleteConversation(aktiveKonversation.anzeigeId, aktiveKonversation.partnerId);
+        } else {
+          // Fallback für Deployments, bei denen eine ältere supabase-data.js geladen wird.
+          let db = window.dhbwSupabase;
+          if (!db) {
+            if (!window.supabase || !window.DHBWMARKT_SUPABASE_URL || !window.DHBWMARKT_SUPABASE_PUBLISHABLE_KEY) {
+              throw new Error("Supabase ist nicht verfügbar. Bitte lade die Seite später erneut.");
+            }
+            db = window.supabase.createClient(
+              window.DHBWMARKT_SUPABASE_URL,
+              window.DHBWMARKT_SUPABASE_PUBLISHABLE_KEY
+            );
+            window.dhbwSupabase = db;
+          }
+          const { data: authData, error: authError } = await db.auth.getUser();
+          if (authError) throw authError;
+          const user = authData && authData.user;
+          if (!user) throw new Error("Bitte melde dich erneut an.");
+          const listingId = String(aktiveKonversation.anzeigeId);
+          const partnerId = String(aktiveKonversation.partnerId);
+          const { data, error } = await db.rpc("delete_chat_conversation", {
+            p_listing_id: listingId,
+            p_partner_id: partnerId
+          });
+          if (error) throw error;
+          if (data !== true) throw new Error("Das Gespräch wurde nicht gefunden oder bereits gelöscht.");
+          const cached = leseJson("nachrichten", []);
+          localStorage.setItem("nachrichten", JSON.stringify(
+            (Array.isArray(cached) ? cached : []).filter(function (message) {
+              return !(String(message.anzeigeId) === listingId &&
+                [String(message.vonId), String(message.anId)].includes(partnerId) &&
+                [String(message.vonId), String(message.anId)].includes(String(user.id)));
+            })
+          ));
         }
-        await dataApi.deleteConversation(aktiveKonversation.anzeigeId, aktiveKonversation.partnerId);
         aktiveKonversation = null;
         entwurf = null;
-        await window.DHBWMarktData.bootstrapCache();
+        if (dataApi && typeof dataApi.bootstrapCache === "function") {
+          await dataApi.bootstrapCache();
+        }
         renderChat();
         renderListe();
       } catch (error) {
