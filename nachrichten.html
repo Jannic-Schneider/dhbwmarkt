@@ -274,7 +274,7 @@
   
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="supabase-data.js"></script>
+<script src="supabase-data.js?v=20261020-chat-delete-fix"></script>
 <script>
     "use strict";
 
@@ -561,7 +561,11 @@
       deleteChatBtn.disabled = true;
       deleteChatBtn.textContent = "Wird gelöscht …";
       try {
-        await window.DHBWMarktData.deleteConversation(aktiveKonversation.anzeigeId, aktiveKonversation.partnerId);
+        const dataApi = window.DHBWMarktData;
+        if (!dataApi || typeof dataApi.deleteConversation !== "function") {
+          throw new Error("Die Chat-Funktion wurde nicht korrekt geladen. Bitte lade die Seite mit Strg+F5 neu.");
+        }
+        await dataApi.deleteConversation(aktiveKonversation.anzeigeId, aktiveKonversation.partnerId);
         aktiveKonversation = null;
         entwurf = null;
         await window.DHBWMarktData.bootstrapCache();
