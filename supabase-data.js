@@ -196,6 +196,28 @@
     if (error) throw error;
   }
 
+  async function deleteConversation(listingId, partnerId) {
+    const user = await currentUser();
+    if (!user) throw new Error("Bitte melde dich erneut an.");
+    if (!listingId || !partnerId || String(partnerId) === String(user.id)) {
+      throw new Error("Das Gespräch ist ungültig.");
+    }
+    const { data, error } = await client().rpc("delete_chat_conversation", {
+      p_listing_id: String(listingId),
+      p_partner_id: String(partnerId)
+    });
+    if (error) throw error;
+    if (data !== true) throw new Error("Das Gespräch konnte nicht gefunden werden.");
+    const cached = JSON.parse(localStorage.getItem("nachrichten") || "[]");
+    localStorage.setItem("nachrichten", JSON.stringify(
+      (Array.isArray(cached) ? cached : []).filter((message) =>
+        !(String(message.anzeigeId) === String(listingId) &&
+          [String(message.vonId), String(message.anId)].includes(String(partnerId)) &&
+          [String(message.vonId), String(message.anId)].includes(String(user.id)))
+    ));
+    return true;
+  }
+
   async function markMessagesRead(listingId, senderId) {
     const user = await currentUser();
     if (!user) return;
@@ -406,7 +428,7 @@
   window.DHBWMarktData = {
     client, currentUser, getListings, saveListing, deleteListing,
     getFavorites, setFavorite, getMessages, sendMessage,
-    markMessagesRead, getReviews, saveReview, deleteReview, mapListing,
+    markMessagesRead, deleteConversation, getReviews, saveReview, deleteReview, mapListing,
     bootstrapCache, updateProfile, changePassword, deleteOwnAccount
   };
 })();
