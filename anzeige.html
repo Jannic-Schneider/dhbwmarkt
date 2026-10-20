@@ -1233,10 +1233,16 @@ function renderBewertungen(anzeige) {
         anzeigeId: anzeige.id,
         sterne: gewaehlt,
         kommentar: kommentarFeld.value.trim()
-      }).then(async function () {
-        // Nach dem Speichern die echte Bewertungs-ID aus Supabase laden.
-        // Der lokale Eintrag verwendet zunächst nur eine temporäre ID; mit dieser
-        // könnte das anschließende Löschen die Datenbankzeile nicht finden.
+      }).then(async function (savedId) {
+        const savedReviews = ladeBewertungen();
+        const savedReview = savedReviews.find(function (b) {
+          return String(b.verkaeuferId) === verkaeuferId &&
+            String(b.bewerterId) === String(loggedInUser.id);
+        });
+        if (savedReview && savedId) {
+          savedReview.id = savedId;
+          speichereBewertungen(savedReviews);
+        }
         await window.DHBWMarktData.bootstrapCache();
         renderBewertungen(anzeige);
       }).catch(function (error) {
