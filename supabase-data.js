@@ -305,15 +305,33 @@
       if (error) throw error;
       if (data !== true) throw new Error("Die Bewertung wurde nicht gefunden oder bereits gelöscht.");
     } else {
-      // Normale Nutzer dürfen nur ihre eigene Bewertung löschen.
-      const { data, error } = await db.from("bewertungen")
-        .delete()
+      // Zuerst prüfen, ob die Bewertung tatsächlich dem angemeldeten Nutzer gehört.
+      const { data: ownedReview, error: checkError } = await db.from("bewertungen")
+        .select("id")
         .eq("id", reviewId)
         .eq("reviewer_id", user.id)
-        .select("id");
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        throw new Error("Du kannst nur deine eigenen Bewertungen löschen.");
+        .maybeSingle();
+      if (checkError) throw checkError;
+      if (!ownedReview) {
+        throw new Error("Die Bewertung gehört laut Datenbank nicht zu diesem Konto. Bitte melde dich mit dem Konto an, mit dem du sie erstellt hast.");
+      }
+
+      // Kein .select() am DELETE: Das würde zusätzlich eine passende SELECT-Policy
+      // voraussetzen und könnte trotz erfolgreicher Löschung eine leere Antwort liefern.
+      const { error: deleteError } = await db.from("bewertungen")
+        .delete()
+        .eq("id", reviewId)
+        .eq("reviewer_id", user.id);
+      if (deleteError) throw deleteError;
+
+      // Prüfen, ob Supabase die Zeile wirklich entfernt hat (RLS kann DELETE still blockieren).
+      const { data: stillThere, error: verifyError } = await db.from("bewertungen")
+        .select("id")
+        .eq("id", reviewId)
+        .maybeSingle();
+      if (verifyError) throw verifyError;
+      if (stillThere) {
+        throw new Error("Supabase hat das Löschen blockiert. Bitte prüfe die DELETE-RLS-Policy der Tabelle bewertungen.");
       }
     }
 
