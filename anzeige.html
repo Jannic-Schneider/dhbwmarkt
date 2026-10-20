@@ -1115,6 +1115,8 @@ function renderBewertungen(anzeige) {
       '<p class="rating-note"><a href="anmeldeseite_regestrierung.html">Melde dich an</a>, um diesen Verkäufer zu bewerten.</p>';
   } else if (istEigener) {
     formHtml = '<p class="rating-note">Du kannst dich nicht selbst bewerten.</p>';
+  } else if (meine) {
+    formHtml = '<p class="rating-note">Du hast diesen Verkäufer bereits bewertet. Bewertungen können nicht geändert werden.</p>';
   } else {
     formHtml = `
       <form class="rating-form" id="ratingForm">
@@ -1126,9 +1128,7 @@ function renderBewertungen(anzeige) {
         </div>
         <textarea id="ratingComment" maxlength="300"
           placeholder="Optionaler Kommentar (max. 300 Zeichen)"></textarea>
-        <button class="rating-submit" type="submit">
-          ${meine ? "Bewertung ändern" : "Bewertung abgeben"}
-        </button>
+        <button class="rating-submit" type="submit">Bewertung abgeben</button>
       </form>
     `;
   }
