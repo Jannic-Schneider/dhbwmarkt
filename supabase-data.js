@@ -398,9 +398,21 @@
     // den Cache-Schlüssel "profileImage-<user-id>" für Profilbilder.
     profileRows.forEach((profile) => {
       const key = "profileImage-" + String(profile.id);
+      // Einen bereits vorhandenen lokalen Avatar nicht löschen, wenn die
+      // öffentliche Profilabfrage keine Bild-URL zurückliefert.
       if (profile.avatar_url) localStorage.setItem(key, profile.avatar_url);
-      else localStorage.removeItem(key);
     });
+
+    // Zusätzlich Avatare aus den geladenen Anzeigen übernehmen. Das ist ein
+    // Fallback, falls die Profil-RPC für einzelne Nutzer keine Zeile liefert.
+    listings.forEach((listing) => {
+      if (listing.ownerId && listing.ownerAvatarUrl) {
+        localStorage.setItem("profileImage-" + String(listing.ownerId), listing.ownerAvatarUrl);
+      }
+    });
+    if (loggedInUser.profileImage) {
+      localStorage.setItem("profileImage-" + String(user.id), loggedInUser.profileImage);
+    }
 
     const listingById = new Map(listings.map((item) => [String(item.id), item]));
     const mappedMessages = messages.map((message) => {
