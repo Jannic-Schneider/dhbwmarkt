@@ -464,6 +464,12 @@ body.dark-mode #upload-close-btn:hover {
     .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
     .footer a { color: #fff; font-weight: 700; text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
+
+    /* Einheitliche Footer-Anordnung auf allen Seiten */
+    .footer-content { max-width: 1100px; }
+    .footer-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .footer-links a, .footer-links .footer-current { color: #fff; font-weight: 700; text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1116,11 +1122,11 @@ fensterOeffnen();
 </script>
 
 <footer class="footer">
-  <div class="footer-content">
-    <span>&copy; 2026 dhbwmarkt</span>
-    <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
-  </div>
-</footer>
+    <div class="footer-content">
+      <span>&copy; 2026 dhbwmarkt</span>
+      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
+    </div>
+  </footer>
 
 </body>
 </html>
