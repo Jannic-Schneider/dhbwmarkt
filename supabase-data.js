@@ -279,9 +279,14 @@
         .eq("id", existing.id)
         .eq("reviewer_id", user.id);
       if (error) throw error;
+      return existing.id;
     } else {
-      const { error } = await db.from("bewertungen").insert(values);
+      const { data: inserted, error } = await db.from("bewertungen")
+        .insert(values)
+        .select("id")
+        .single();
       if (error) throw error;
+      return inserted.id;
     }
   }
 
