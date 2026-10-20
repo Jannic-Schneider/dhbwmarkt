@@ -362,15 +362,34 @@
     }]));
 
     // Nutzerspezifische Daten erst nach erfolgreicher Anmeldung laden.
-    const [favorites, messages, reviews, profileResult] = await Promise.all([
+    const [favorites, messages, reviews] = await Promise.all([
       getFavorites(),
       getMessages(),
-      getReviews(),
-      db.from("profiles").select("id,display_name,avatar_url")
+      getReviews()
     ]);
     localStorage.setItem("favoriten-" + user.id, JSON.stringify(favorites));
 
-    const profileRows = (profileResult && !profileResult.error && profileResult.data) || [];
+    // Profil-Avatare gezielt über eine sichere RPC laden. Eine normale
+    // SELECT-Abfrage auf profiles liefert wegen RLS oft nur das eigene Profil.
+    const profileIds = [...new Set([
+      String(user.id),
+      ...messages.flatMap((message) => [String(message.vonId), String(message.anId)])
+    ].filter(Boolean))];
+    let profileRows = [];
+    try {
+      const { data: publicProfiles, error: publicProfilesError } = await db.rpc(
+        "get_public_profiles",
+        { p_user_ids: profileIds }
+      );
+      if (publicProfilesError) throw publicProfilesError;
+      profileRows = publicProfiles || [];
+    } catch (profileRpcError) {
+      console.warn("Öffentliche Profilbilder konnten nicht über RPC geladen werden:", profileRpcError);
+      const { data: ownProfiles, error: ownProfilesError } = await db
+        .from("profiles").select("id,display_name,avatar_url").in("id", [user.id]);
+      if (!ownProfilesError) profileRows = ownProfiles || [];
+    }
+
     const profileById = new Map(
       profileRows.map((item) => [String(item.id), item])
     );
@@ -379,11 +398,8 @@
     // den Cache-Schlüssel "profileImage-<user-id>" für Profilbilder.
     profileRows.forEach((profile) => {
       const key = "profileImage-" + String(profile.id);
-      if (profile.avatar_url) {
-        localStorage.setItem(key, profile.avatar_url);
-      } else {
-        localStorage.removeItem(key);
-      }
+      if (profile.avatar_url) localStorage.setItem(key, profile.avatar_url);
+      else localStorage.removeItem(key);
     });
 
     const listingById = new Map(listings.map((item) => [String(item.id), item]));
