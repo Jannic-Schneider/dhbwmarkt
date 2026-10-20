@@ -143,6 +143,9 @@
     }
     .chat-head-text { flex: 1; min-width: 0; }
     .chat-head-text strong { display: block; font-size: 16px; }
+    .delete-chat-btn { flex-shrink: 0; padding: 9px 12px; color: var(--red); background: transparent; border: 1px solid var(--red); border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .delete-chat-btn:hover { color: #fff; background: var(--red); }
+    .delete-chat-btn:disabled { opacity: .6; cursor: wait; }
 
     .ad-chip {
       display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
@@ -240,6 +243,7 @@
               <strong id="chatPartner"></strong>
               <a class="ad-chip" id="chatAd" href="#"></a>
             </div>
+            <button class="delete-chat-btn" id="deleteChatBtn" type="button">Chat löschen</button>
           </div>
 
           <div class="chat-messages" id="chatMessages"></div>
@@ -380,6 +384,7 @@
     const chatMessages = document.getElementById("chatMessages");
     const chatForm = document.getElementById("chatForm");
     const chatInput = document.getElementById("chatInput");
+    const deleteChatBtn = document.getElementById("deleteChatBtn");
 
     let aktiveKonversation = null;
     let entwurf = null;
@@ -545,6 +550,30 @@
         return eintrag.id === button.dataset.konv;
       });
       if (k) oeffneKonversation(k);
+    });
+
+    deleteChatBtn.addEventListener("click", async function () {
+      if (!aktiveKonversation || !aktiveKonversation.letzte) {
+        window.alert("Ein noch leeres Gespräch kann nicht gelöscht werden.");
+        return;
+      }
+      if (!window.confirm("Möchtest du diesen Chat wirklich löschen? Alle Nachrichten dieses Gesprächs werden für beide Beteiligten dauerhaft gelöscht.")) return;
+      deleteChatBtn.disabled = true;
+      deleteChatBtn.textContent = "Wird gelöscht …";
+      try {
+        await window.DHBWMarktData.deleteConversation(aktiveKonversation.anzeigeId, aktiveKonversation.partnerId);
+        aktiveKonversation = null;
+        entwurf = null;
+        await window.DHBWMarktData.bootstrapCache();
+        renderChat();
+        renderListe();
+      } catch (error) {
+        console.error("Chat konnte nicht gelöscht werden:", error);
+        window.alert("Chat konnte nicht gelöscht werden: " + (error.message || error));
+      } finally {
+        deleteChatBtn.disabled = false;
+        deleteChatBtn.textContent = "Chat löschen";
+      }
     });
 
     document.getElementById("mobileBack").addEventListener("click", function () {
