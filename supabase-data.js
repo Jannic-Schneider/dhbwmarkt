@@ -275,12 +275,11 @@
       .from("bewertungen")
       .delete()
       .eq("id", reviewId)
-      .eq("reviewer_id", user.id)
       .select("id");
 
     if (error) throw error;
     if (!data || data.length === 0) {
-      throw new Error("Die Bewertung konnte nicht gelöscht werden. Du kannst nur eigene Bewertungen löschen.");
+      throw new Error("Die Bewertung wurde nicht gelöscht. Prüfe, ob du die nötigen Berechtigungen hast.");
     }
 
     const cached = JSON.parse(localStorage.getItem("bewertungen") || "[]");
