@@ -214,7 +214,7 @@
         !(String(message.anzeigeId) === String(listingId) &&
           [String(message.vonId), String(message.anId)].includes(String(partnerId)) &&
           [String(message.vonId), String(message.anId)].includes(String(user.id)))
-    ));
+    )));
     return true;
   }
 
