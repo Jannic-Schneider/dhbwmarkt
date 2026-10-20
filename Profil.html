@@ -471,6 +471,43 @@
       }
     }
 
+
+    /* Alle drei Footer-Elemente als gemeinsame, mittig ausgerichtete Gruppe */
+    .footer-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .footer-links {
+      position: static;
+      width: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .footer-links > :first-child,
+    .footer-links > :last-child {
+      position: static;
+      left: auto;
+      transform: none;
+      white-space: nowrap;
+    }
+    .footer-links a,
+    .footer-links .footer-current,
+    .footer-links .footer-copyright {
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .footer-links a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .footer-content { display: flex; }
+      .footer-links { display: flex; gap: 12px; }
+    }
+
 </style>
 </head>
 
@@ -628,8 +665,11 @@
 
   <footer class="footer">
     <div class="footer-content">
-      <span>&copy; 2026 dhbwmarkt</span>
-      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
+      <div class="footer-links">
+        <span class="footer-copyright">&copy; 2026 dhbwmarkt</span>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </div>
     </div>
   </footer>
 
