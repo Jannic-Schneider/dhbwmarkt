@@ -1782,20 +1782,9 @@ if (deleteButton) {
       });
       localStorage.setItem("anzeigen", JSON.stringify([aktuelleAnzeige].concat(rest)));
 
-      // Favoriten beim Öffnen der Detailseite direkt aus Supabase synchronisieren.
-      // So wird das Herz nicht von einem veralteten localStorage-Cache bestimmt.
-      if (loggedInUser && window.DHBWMarktData && window.DHBWMarktData.getFavorites) {
-        try {
-          const aktuelleFavoriten = await window.DHBWMarktData.getFavorites();
-          localStorage.setItem(
-            "favoriten-" + loggedInUser.id,
-            JSON.stringify(aktuelleFavoriten.map(function (id) { return String(id); }))
-          );
-        } catch (error) {
-          console.warn("Favoriten konnten nicht aus Supabase synchronisiert werden; verwende den lokalen Cache.", error);
-        }
-      }
-
+      // Startseite und Detailseite verwenden denselben Favoriten-Cache.
+      // Beim Anzeigenladen nicht erneut überschreiben, da ein parallel laufender
+      // Favoriten-Klick sonst durch einen veralteten Datenbankstand verloren gehen kann.
       zeigeAnzeige(aktuelleAnzeige);
     } else {
       zeigeFehler();
