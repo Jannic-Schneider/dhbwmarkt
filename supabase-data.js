@@ -370,10 +370,22 @@
     ]);
     localStorage.setItem("favoriten-" + user.id, JSON.stringify(favorites));
 
+    const profileRows = (profileResult && !profileResult.error && profileResult.data) || [];
     const profileById = new Map(
-      ((profileResult && !profileResult.error && profileResult.data) || [])
-        .map((item) => [String(item.id), item])
+      profileRows.map((item) => [String(item.id), item])
     );
+
+    // Avatare für die Nachrichten-Seite bereitstellen. Diese verwendet
+    // den Cache-Schlüssel "profileImage-<user-id>" für Profilbilder.
+    profileRows.forEach((profile) => {
+      const key = "profileImage-" + String(profile.id);
+      if (profile.avatar_url) {
+        localStorage.setItem(key, profile.avatar_url);
+      } else {
+        localStorage.removeItem(key);
+      }
+    });
+
     const listingById = new Map(listings.map((item) => [String(item.id), item]));
     const mappedMessages = messages.map((message) => {
       const listing = listingById.get(String(message.anzeigeId)) || {};
