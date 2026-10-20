@@ -400,16 +400,18 @@
     }]));
 
     // Nutzerspezifische Daten erst nach erfolgreicher Anmeldung laden.
-    // Den Datenbankstand nur als Erstinitialisierung übernehmen.
-    // Ein vorhandener lokaler Favoritenstand kann eine gerade erfolgte Änderung
-    // enthalten, deren Supabase-Request beim Seitenwechsel noch lief.
+    // Favoriten auf jedem Gerät mit Supabase synchronisieren. Den Cache nur dann
+    // überschreiben, wenn er sich während der laufenden Requests nicht verändert
+    // hat; so bleibt ein gerade angeklickter Favorit vor einem veralteten Request geschützt.
     const favoritesCacheKey = "favoriten-" + user.id;
     const [favorites, messages, reviews] = await Promise.all([
       getFavorites(),
       getMessages(),
       getReviews()
     ]);
-    if (localStorage.getItem(favoritesCacheKey) === null) {
+    const currentFavoritesCacheValue = localStorage.getItem(favoritesCacheKey);
+    if (currentFavoritesCacheValue === initialFavoritesCacheValue ||
+        (initialFavoritesCacheKey !== favoritesCacheKey && currentFavoritesCacheValue === null)) {
       localStorage.setItem(favoritesCacheKey, JSON.stringify(favorites.map(String)));
     }
 
