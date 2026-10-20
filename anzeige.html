@@ -1233,7 +1233,11 @@ function renderBewertungen(anzeige) {
         anzeigeId: anzeige.id,
         sterne: gewaehlt,
         kommentar: kommentarFeld.value.trim()
-      }).then(function () {
+      }).then(async function () {
+        // Nach dem Speichern die echte Bewertungs-ID aus Supabase laden.
+        // Der lokale Eintrag verwendet zunächst nur eine temporäre ID; mit dieser
+        // könnte das anschließende Löschen die Datenbankzeile nicht finden.
+        await window.DHBWMarktData.bootstrapCache();
         renderBewertungen(anzeige);
       }).catch(function (error) {
         console.error(error);
