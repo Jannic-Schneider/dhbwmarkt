@@ -385,12 +385,20 @@
     }]));
 
     // Nutzerspezifische Daten erst nach erfolgreicher Anmeldung laden.
+    // Favoriten aus der Datenbank laden, ohne einen Klick zu überschreiben,
+    // der während des laufenden Requests bereits lokal gespeichert wurde.
+    const favoritesCacheKey = "favoriten-" + user.id;
+    const favoritesCacheBeforeFetch = localStorage.getItem(favoritesCacheKey);
     const [favorites, messages, reviews] = await Promise.all([
       getFavorites(),
       getMessages(),
       getReviews()
     ]);
-    localStorage.setItem("favoriten-" + user.id, JSON.stringify(favorites));
+    if (localStorage.getItem(favoritesCacheKey) === favoritesCacheBeforeFetch) {
+      localStorage.setItem(favoritesCacheKey, JSON.stringify(favorites.map(String)));
+    } else {
+      console.info("Favoriten-Cache wurde während des Ladens geändert; lokale Änderungen bleiben erhalten.");
+    }
 
     // Profil-Avatare gezielt über eine sichere RPC laden. Eine normale
     // SELECT-Abfrage auf profiles liefert wegen RLS oft nur das eigene Profil.
