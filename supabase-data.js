@@ -374,7 +374,7 @@
     const profileIds = [...new Set([
       String(user.id),
       ...messages.flatMap((message) => [String(message.vonId), String(message.anId)])
-    ].filter(Boolean))];
+    ].filter((id) => id && id !== "null" && id !== "undefined"))];
     let profileRows = [];
     try {
       const { data: publicProfiles, error: publicProfilesError } = await db.rpc(
