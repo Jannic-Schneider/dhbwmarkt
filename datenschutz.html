@@ -57,7 +57,13 @@
       .privacy-card { padding: 26px 20px; }
       h1 { font-size: 28px; }
     }
-  </style>
+  
+    /* Einheitliche Footer-Anordnung auf allen Seiten */
+    .footer-content { max-width: 1100px; }
+    .footer-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .footer-links a, .footer-links .footer-current { color: #fff; font-weight: 700; text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; }
+</style>
 </head>
 <body>
   <header class="header">
@@ -135,7 +141,7 @@
   <footer class="footer">
     <div class="footer-content">
       <span>&copy; 2026 dhbwmarkt</span>
-      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html" aria-current="page">Datenschutz</a></div>
+      <div class="footer-links"><a href="impressum.html">Impressum</a><span class="footer-current">Datenschutz</span></div>
     </div>
   </footer>
   <script>
