@@ -2497,25 +2497,7 @@ function ladeGespeichertesTheme() {
     );
 
 
-    results.addEventListener(
-      "click",
-      function (event) {
-        const karte =
-          event.target.closest(
-            ".card[data-listing-id]"
-          );
 
-        if (!karte) {
-          return;
-        }
-
-        window.location.href =
-          "anzeige.html?id=" +
-          encodeURIComponent(
-            karte.dataset.listingId
-          );
-      }
-    );
 
     
           nachrichtenButton.addEventListener(
