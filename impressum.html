@@ -274,6 +274,61 @@
       .footer-content { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
       .footer-links { justify-self: auto; }
     }
+
+    /* Footer: Impressum selbst mittig, Datenschutz direkt daneben */
+    .footer-content {
+      position: relative;
+      display: block;
+      min-height: 24px;
+    }
+    .footer-content > span {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .footer-links {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      display: block;
+    }
+    .footer-links > :first-child {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .footer-links > :last-child {
+      position: absolute;
+      left: calc(50% + 55px);
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+      .footer-content {
+        display: flex;
+        position: static;
+        min-height: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .footer-content > span {
+        position: static;
+      }
+      .footer-links {
+        position: static;
+        width: auto;
+        display: flex;
+        gap: 18px;
+      }
+      .footer-links > :first-child,
+      .footer-links > :last-child {
+        position: static;
+        transform: none;
+      }
+    }
+
 </style>
 </head>
 
