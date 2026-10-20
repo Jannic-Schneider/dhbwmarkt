@@ -344,6 +344,21 @@
   async function bootstrapCache() {
     const db = client();
 
+    // Den Favoriten-Cache VOR JEDEM asynchronen Request erfassen.
+    // Sonst kann ein Klick während getListings() passieren und anschließend
+    // von einem älteren Favoritenstand aus Supabase überschrieben werden.
+    let initialFavoritesCacheKey = null;
+    let initialFavoritesCacheValue = null;
+    try {
+      const initialUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+      if (initialUser && initialUser.id) {
+        initialFavoritesCacheKey = "favoriten-" + initialUser.id;
+        initialFavoritesCacheValue = localStorage.getItem(initialFavoritesCacheKey);
+      }
+    } catch (_) {
+      // Ein ungültiger lokaler Benutzer-Cache darf den öffentlichen Seitenaufbau nicht stoppen.
+    }
+
     // Öffentliche Anzeigen zuerst laden. Authentifizierungsprüfungen dürfen
     // das Anzeigen der öffentlichen Startseite niemals blockieren.
     const listings = await getListings();
@@ -385,19 +400,22 @@
     }]));
 
     // Nutzerspezifische Daten erst nach erfolgreicher Anmeldung laden.
-    // Favoriten aus der Datenbank laden, ohne einen Klick zu überschreiben,
-    // der während des laufenden Requests bereits lokal gespeichert wurde.
+    // Nur den Datenbankstand übernehmen, wenn der Cache seit Beginn des
+    // gesamten Bootstrap-Vorgangs unverändert ist. So bleiben auch Klicks
+    // erhalten, die während des Ladens der Anzeigen ausgeführt wurden.
     const favoritesCacheKey = "favoriten-" + user.id;
-    const favoritesCacheBeforeFetch = localStorage.getItem(favoritesCacheKey);
     const [favorites, messages, reviews] = await Promise.all([
       getFavorites(),
       getMessages(),
       getReviews()
     ]);
-    if (localStorage.getItem(favoritesCacheKey) === favoritesCacheBeforeFetch) {
+    const cacheCanBeUpdated =
+      initialFavoritesCacheKey === favoritesCacheKey &&
+      localStorage.getItem(favoritesCacheKey) === initialFavoritesCacheValue;
+    if (cacheCanBeUpdated) {
       localStorage.setItem(favoritesCacheKey, JSON.stringify(favorites.map(String)));
     } else {
-      console.info("Favoriten-Cache wurde während des Ladens geändert; lokale Änderungen bleiben erhalten.");
+      console.info("Favoriten-Cache wurde während des Seitenladens geändert; lokale Änderungen bleiben erhalten.");
     }
 
     // Profil-Avatare gezielt über eine sichere RPC laden. Eine normale
