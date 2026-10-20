@@ -1250,7 +1250,10 @@ function renderBewertungen(anzeige) {
       button.disabled = true;
       button.textContent = "Wird gelöscht …";
 
-      window.DHBWMarktData.deleteReview(button.dataset.deleteRating)
+      window.DHBWMarktData.deleteReview(
+        button.dataset.deleteRating,
+        Boolean(loggedInUser && loggedInUser.role === "admin")
+      )
         .then(function () {
           const verbleibend = ladeBewertungen().filter(function (b) {
             return String(b.id) !== String(button.dataset.deleteRating);
