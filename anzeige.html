@@ -1247,12 +1247,23 @@ function renderBewertungen(anzeige) {
     button.addEventListener("click", function () {
       if (!window.confirm("Bewertung wirklich löschen?")) return;
 
-      const verbleibend = ladeBewertungen().filter(function (b) {
-        return String(b.id) !== String(button.dataset.deleteRating);
-      });
+      button.disabled = true;
+      button.textContent = "Wird gelöscht …";
 
-      speichereBewertungen(verbleibend);
-      renderBewertungen(anzeige);
+      window.DHBWMarktData.deleteReview(button.dataset.deleteRating)
+        .then(function () {
+          const verbleibend = ladeBewertungen().filter(function (b) {
+            return String(b.id) !== String(button.dataset.deleteRating);
+          });
+          speichereBewertungen(verbleibend);
+          renderBewertungen(anzeige);
+        })
+        .catch(function (error) {
+          console.error("Bewertung konnte nicht gelöscht werden:", error);
+          window.alert("Bewertung konnte nicht gelöscht werden: " + (error.message || error));
+          button.disabled = false;
+          button.textContent = "Löschen";
+        });
     });
   });
 }
