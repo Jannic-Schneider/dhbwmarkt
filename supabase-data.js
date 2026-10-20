@@ -400,22 +400,17 @@
     }]));
 
     // Nutzerspezifische Daten erst nach erfolgreicher Anmeldung laden.
-    // Nur den Datenbankstand übernehmen, wenn der Cache seit Beginn des
-    // gesamten Bootstrap-Vorgangs unverändert ist. So bleiben auch Klicks
-    // erhalten, die während des Ladens der Anzeigen ausgeführt wurden.
+    // Den Datenbankstand nur als Erstinitialisierung übernehmen.
+    // Ein vorhandener lokaler Favoritenstand kann eine gerade erfolgte Änderung
+    // enthalten, deren Supabase-Request beim Seitenwechsel noch lief.
     const favoritesCacheKey = "favoriten-" + user.id;
     const [favorites, messages, reviews] = await Promise.all([
       getFavorites(),
       getMessages(),
       getReviews()
     ]);
-    const cacheCanBeUpdated =
-      initialFavoritesCacheKey === favoritesCacheKey &&
-      localStorage.getItem(favoritesCacheKey) === initialFavoritesCacheValue;
-    if (cacheCanBeUpdated) {
+    if (localStorage.getItem(favoritesCacheKey) === null) {
       localStorage.setItem(favoritesCacheKey, JSON.stringify(favorites.map(String)));
-    } else {
-      console.info("Favoriten-Cache wurde während des Seitenladens geändert; lokale Änderungen bleiben erhalten.");
     }
 
     // Profil-Avatare gezielt über eine sichere RPC laden. Eine normale
