@@ -620,6 +620,62 @@ body.dark-mode .error-message {
   object-fit: cover;
 }
 
+/* Großansicht für Bilder auf der Anzeigendetailseite */
+.detail-image > img {
+  cursor: zoom-in;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.88);
+  cursor: zoom-out;
+}
+
+.image-lightbox.open {
+  display: flex;
+}
+
+.image-lightbox img {
+  display: block;
+  max-width: 95vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: default;
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.image-lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.image-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.lightbox-open {
+  overflow: hidden;
+}
+
 /* Bewertungen */
 .stars { color: #f5a623; letter-spacing: 1px; }
 
@@ -1629,6 +1685,54 @@ if (bilder.length > 0) {
   }
 
   zeigeBild(0);
+
+  // Großansicht nur auf der Detailseite öffnen
+  const lightbox = document.createElement("div");
+  lightbox.className = "image-lightbox";
+  lightbox.setAttribute("role", "dialog");
+  lightbox.setAttribute("aria-modal", "true");
+  lightbox.setAttribute("aria-label", "Bild in Großansicht");
+
+  const grossBild = document.createElement("img");
+  grossBild.alt = anzeige.title || "";
+
+  const schliessen = document.createElement("button");
+  schliessen.type = "button";
+  schliessen.className = "image-lightbox-close";
+  schliessen.setAttribute("aria-label", "Großansicht schließen");
+  schliessen.textContent = "×";
+
+  lightbox.appendChild(grossBild);
+  lightbox.appendChild(schliessen);
+  document.body.appendChild(lightbox);
+
+  function schliesseGrossansicht() {
+    lightbox.classList.remove("open");
+    document.body.classList.remove("lightbox-open");
+  }
+
+  hauptBild.style.cursor = "zoom-in";
+  hauptBild.setAttribute("title", "Zum Vergrößern anklicken");
+  hauptBild.addEventListener("click", function () {
+    grossBild.src = bilder[aktuell];
+    grossBild.alt = hauptBild.alt;
+    lightbox.classList.add("open");
+    document.body.classList.add("lightbox-open");
+    schliessen.focus();
+  });
+
+  schliessen.addEventListener("click", schliesseGrossansicht);
+  lightbox.addEventListener("click", function (event) {
+    if (event.target === lightbox) schliesseGrossansicht();
+  });
+  grossBild.addEventListener("click", function (event) {
+    event.stopPropagation();
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && lightbox.classList.contains("open")) {
+      schliesseGrossansicht();
+    }
+  });
 }
 
     const contactButton =
